@@ -8,11 +8,13 @@ from mcp_server.sql_tool import SQLTool
 logger = get_logger(__name__)
 
 _sql_tool = None
+_sql_tool_init_failed = False
 
 
 def _get_tool():
-    global _sql_tool
+    global _sql_tool, _sql_tool_init_failed
     if _sql_tool is None:
+        _sql_tool_init_failed = False
         _sql_tool = SQLTool()
     return _sql_tool
 

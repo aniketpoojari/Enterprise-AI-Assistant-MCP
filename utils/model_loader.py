@@ -54,8 +54,16 @@ class ModelLoader:
                 raise Exception(error_msg)
 
             model_name = self.config.get_env("MODEL_NAME", "llama-3.1-8b-instant")
-            temperature = float(self.config.get_env("MODEL_TEMPERATURE", "0.1"))
-            max_tokens = int(self.config.get_env("MODEL_MAX_TOKENS", "4096"))
+            try:
+                temperature = float(self.config.get_env("MODEL_TEMPERATURE", "0.1"))
+            except (ValueError, TypeError):
+                logger.warning("Invalid MODEL_TEMPERATURE, using default 0.1")
+                temperature = 0.1
+            try:
+                max_tokens = int(self.config.get_env("MODEL_MAX_TOKENS", "4096"))
+            except (ValueError, TypeError):
+                logger.warning("Invalid MODEL_MAX_TOKENS, using default 4096")
+                max_tokens = 4096
 
             logger.info(f"Loading Groq model: {model_name}")
 

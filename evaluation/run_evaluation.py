@@ -77,7 +77,7 @@ def run_full_evaluation(max_queries: int = None):
     logger.info("=" * 60)
 
     # Save results
-    output_path = Path("evaluation/results.json")
+    output_path = Path(__file__).parent / "results.json"
     with open(output_path, "w") as f:
         json.dump(results, f, indent=2, default=str)
     logger.info(f"Results saved to {output_path}")

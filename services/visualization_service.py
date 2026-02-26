@@ -59,6 +59,13 @@ class VisualizationService:
                     "chart_type": chart_type,
                 }
 
+            if len(columns) < 2:
+                return {
+                    "error": "Need at least 2 columns to generate a chart",
+                    "chart_base64": "",
+                    "chart_type": chart_type,
+                }
+
             # Auto-detect x and y columns if not enough info
             x_col, y_cols = self._detect_axes(columns, rows)
 

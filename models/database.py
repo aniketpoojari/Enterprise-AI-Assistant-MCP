@@ -49,6 +49,7 @@ class DatabaseManager:
         self, sql: str, params: tuple = (), max_rows: int = 100
     ) -> Dict[str, Any]:
         """Execute a SELECT query and return results."""
+        conn = None
         try:
             conn = self._get_connection()
             cursor = conn.cursor()
@@ -64,8 +65,6 @@ class DatabaseManager:
                 [desc[0] for desc in cursor.description] if cursor.description else []
             )
             data = [dict(row) for row in rows]
-
-            conn.close()
 
             return {
                 "columns": columns,
@@ -86,9 +85,13 @@ class DatabaseManager:
                 "columns": [],
                 "row_count": 0,
             }
+        finally:
+            if conn:
+                conn.close()
 
     def get_schema(self) -> str:
         """Return the full database schema as DDL."""
+        conn = None
         try:
             conn = self._get_connection()
             cursor = conn.cursor()
@@ -102,16 +105,19 @@ class DatabaseManager:
             for table in tables:
                 schema_parts.append(table["sql"] + ";")
 
-            conn.close()
             return "\n\n".join(schema_parts)
 
         except Exception as e:
             error_msg = f"Error getting schema -> {str(e)}"
             logger.error(error_msg)
             return ""
+        finally:
+            if conn:
+                conn.close()
 
     def get_table_names(self) -> List[str]:
         """Return list of table names."""
+        conn = None
         try:
             conn = self._get_connection()
             cursor = conn.cursor()
@@ -119,15 +125,18 @@ class DatabaseManager:
                 "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
             )
             tables = [row["name"] for row in cursor.fetchall()]
-            conn.close()
             return tables
 
         except Exception as e:
             logger.error(f"Error getting table names -> {str(e)}")
             return []
+        finally:
+            if conn:
+                conn.close()
 
     def get_table_info(self, table_name: str) -> Dict[str, Any]:
         """Get detailed info about a table."""
+        conn = None
         try:
             conn = self._get_connection()
             cursor = conn.cursor()
@@ -148,8 +157,6 @@ class DatabaseManager:
             cursor.execute(f"SELECT COUNT(*) as count FROM '{table_name}'")
             row_count = cursor.fetchone()["count"]
 
-            conn.close()
-
             return {
                 "table_name": table_name,
                 "columns": columns,
@@ -164,6 +171,9 @@ class DatabaseManager:
                 "row_count": 0,
                 "error": str(e),
             }
+        finally:
+            if conn:
+                conn.close()
 
     def get_sample_rows(self, table_name: str, limit: int = 5) -> Dict[str, Any]:
         """Get sample rows from a table."""
@@ -219,6 +229,7 @@ class DatabaseManager:
         success: bool = True,
     ):
         """Record a cost tracking entry."""
+        conn = None
         try:
             conn = self._get_connection()
             cursor = conn.cursor()
@@ -242,7 +253,9 @@ class DatabaseManager:
                 ),
             )
             conn.commit()
-            conn.close()
 
         except Exception as e:
             logger.error(f"Error recording cost -> {str(e)}")
+        finally:
+            if conn:
+                conn.close()

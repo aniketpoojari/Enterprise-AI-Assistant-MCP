@@ -236,7 +236,7 @@ class EnterpriseAssistantWorkflow:
 
         except Exception as e:
             logger.error(f"Error in output guardrail node -> {str(e)}")
-            return {}
+            return {"guardrail_results": state.get("guardrail_results", [])}
 
     def general_response_node(self, state: AgentState) -> Dict[str, Any]:
         """Handle general/off-topic queries."""

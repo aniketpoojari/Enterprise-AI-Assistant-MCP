@@ -17,7 +17,14 @@ logger = get_logger(__name__)
 class OutputGuardrails:
     """Validates and sanitizes output before returning to the user."""
 
-    def __init__(self, config_path: str = "config/guardrails_config.yaml"):
+    def __init__(
+        self,
+        config_path: str = None,
+    ):
+        if config_path is None:
+            config_path = str(
+                Path(__file__).parent.parent / "config" / "guardrails_config.yaml"
+            )
         try:
             self.config = self._load_config(config_path)
             self.output_config = self.config.get("output_guardrails", {})

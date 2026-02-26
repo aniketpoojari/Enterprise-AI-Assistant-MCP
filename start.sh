@@ -51,6 +51,13 @@ FASTAPI_PID=$!
 echo "Waiting for FastAPI to start..."
 sleep 8
 
+# Verify FastAPI started successfully
+if ! kill -0 $FASTAPI_PID 2>/dev/null; then
+    echo "ERROR: FastAPI failed to start. Check logs above."
+    exit 1
+fi
+echo "FastAPI is running (PID: $FASTAPI_PID)"
+
 echo "Starting Streamlit frontend on port 7860..."
 streamlit run app.py \
     --server.port 7860 \
@@ -59,8 +66,12 @@ streamlit run app.py \
     --browser.gatherUsageStats false &
 STREAMLIT_PID=$!
 
+echo "Streamlit started (PID: $STREAMLIT_PID)"
+
 # Wait for either process to exit
 wait -n $FASTAPI_PID $STREAMLIT_PID
+EXIT_CODE=$?
+echo "A process exited with code $EXIT_CODE. Shutting down..."
 
 # If one exits, stop the other
 kill $FASTAPI_PID $STREAMLIT_PID 2>/dev/null

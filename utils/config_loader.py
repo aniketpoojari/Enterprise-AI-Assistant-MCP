@@ -35,8 +35,12 @@ logger = get_logger(__name__)
 class ConfigLoader:
     """Loads configuration from YAML files and environment variables."""
 
-    def __init__(self, config_file: str = "config/config.yaml"):
+    def __init__(self, config_file: str = None):
         try:
+            if config_file is None:
+                config_file = str(
+                    Path(__file__).parent.parent / "config" / "config.yaml"
+                )
             self.config_file = config_file
             self.config_data = self.load_config()
             logger.info("ConfigLoader initialized successfully")

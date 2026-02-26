@@ -15,7 +15,14 @@ logger = get_logger(__name__)
 class InputGuardrails:
     """Validates user input for safety before passing to the agent."""
 
-    def __init__(self, config_path: str = "config/guardrails_config.yaml"):
+    def __init__(
+        self,
+        config_path: str = None,
+    ):
+        if config_path is None:
+            config_path = str(
+                Path(__file__).parent.parent / "config" / "guardrails_config.yaml"
+            )
         try:
             self.config = self._load_config(config_path)
             self.input_config = self.config.get("input_guardrails", {})

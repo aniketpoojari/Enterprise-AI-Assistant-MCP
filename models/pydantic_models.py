@@ -127,7 +127,7 @@ class QueryResponse(BaseModel):
     request_id: str = Field(..., description="Unique request identifier")
     query: str = Field(..., description="Original user query")
     response: str = Field(..., description="Natural language response")
-    intent: QueryIntent = Field(..., description="Detected query intent")
+    intent: str = Field(..., description="Detected query intent")
     sql_result: Optional[SQLResult] = Field(
         None, description="SQL query result if applicable"
     )

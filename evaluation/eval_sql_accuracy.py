@@ -23,7 +23,7 @@ class SQLAccuracyEvaluator:
 
     def _load_test_queries(self) -> List[Dict]:
         """Load test queries from JSON file."""
-        path = Path("evaluation/test_queries.json")
+        path = Path(__file__).parent / "test_queries.json"
         with open(path, "r") as f:
             return json.load(f)
 
