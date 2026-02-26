@@ -34,21 +34,14 @@ def generate_chart(
     x_label: str = "",
     y_label: str = "",
 ) -> dict:
-    """Generate a chart by querying the database and visualizing the results.
-
-    This tool queries the database first, then creates a chart. You do NOT need
-    to call query_database before this tool.
+    """Query data and generate a chart (bar, line, pie, or scatter).
 
     Args:
-        natural_language_query: The business question to query and visualize
-            (e.g., "top 10 products by revenue", "monthly sales trend")
-        chart_type: 'bar', 'line', 'pie', or 'scatter'
-        title: Chart title
-        x_label: X-axis label
-        y_label: Y-axis label
-
-    Returns:
-        Dict with chart_base64 (PNG image), chart_type, data_summary, sql, row_count
+        natural_language_query: Question about data (e.g. "revenue by category")
+        chart_type: The type of chart: 'bar', 'line', 'pie', or 'scatter'
+        title: Optional chart title
+        x_label: Optional X-axis label
+        y_label: Optional Y-axis label
     """
     try:
         # Step 1: Query the database

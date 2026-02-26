@@ -21,16 +21,10 @@ def _get_tool():
 
 @tool
 def query_database(natural_language_query: str, max_rows: int = 100) -> dict:
-    """Query the e-commerce database with a natural language question.
-
-    Use this tool to answer any question about products, orders, customers,
-    reviews, or inventory. The tool converts your question to SQL and returns results.
+    """Query the database using a natural language question.
 
     Args:
-        natural_language_query: Business question (e.g., "top 10 products by revenue")
-        max_rows: Maximum rows to return (default 100)
-
-    Returns:
-        Dict with sql, columns, rows, row_count
+        natural_language_query: Question about data (e.g. "top 5 products")
+        max_rows: Max number of rows to return (default 100)
     """
     return _get_tool().execute(natural_language_query, max_rows)

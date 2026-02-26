@@ -28,18 +28,11 @@ def _get_sql_tool():
 
 @tool
 def generate_report(natural_language_query: str, report_type: str = "summary") -> dict:
-    """Generate a markdown business report by querying the database and analyzing results.
-
-    This tool queries the database first, then creates a report. You do NOT need
-    to call query_database before this tool.
+    """Query data and generate a business report (summary, detailed, or executive).
 
     Args:
-        natural_language_query: The business question to analyze
-            (e.g., "monthly revenue trends", "customer segment breakdown")
-        report_type: 'summary', 'detailed', or 'executive'
-
-    Returns:
-        Dict with markdown report, key_findings, data_quality_notes
+        natural_language_query: Question about data (e.g. "sales analysis")
+        report_type: The type of report: 'summary', 'detailed', or 'executive'
     """
     try:
         # Step 1: Query the database
