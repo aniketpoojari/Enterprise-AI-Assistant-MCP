@@ -158,6 +158,56 @@ async def query(request: QueryRequest, workflow=Depends(get_workflow)):
                 guardrail_flags=flags_str,
             )
 
+        # Extract chart result if present
+        chart_data = None
+        if result.get("chart_result"):
+            chart_data = result["chart_result"]
+        elif result.get("messages"):
+            # Try to find chart in tool results in message history
+            import json
+
+            from langchain_core.messages import ToolMessage
+
+            for msg in reversed(result["messages"]):
+                if isinstance(msg, ToolMessage):
+                    try:
+                        data = json.loads(msg.content)
+                        if data.get("chart_base64"):
+                            chart_data = {
+                                "chart_base64": data["chart_base64"],
+                                "chart_type": data.get("chart_type", "bar"),
+                                "data_summary": data.get("data_summary", ""),
+                            }
+                            break
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+
+        # Extract report result if present
+        report_data = None
+        if result.get("report_result"):
+            report_data = result["report_result"]
+        elif result.get("messages"):
+            # Try to find report in tool results in message history
+            import json
+
+            from langchain_core.messages import ToolMessage
+
+            for msg in reversed(result["messages"]):
+                if isinstance(msg, ToolMessage):
+                    try:
+                        data = json.loads(msg.content)
+                        if data.get("markdown"):
+                            report_data = {
+                                "markdown": data["markdown"],
+                                "key_findings": data.get("key_findings", []),
+                                "data_quality_notes": data.get(
+                                    "data_quality_notes", []
+                                ),
+                            }
+                            break
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+
         return QueryResponse(
             request_id=request_id,
             query=request.query,
@@ -166,6 +216,8 @@ async def query(request: QueryRequest, workflow=Depends(get_workflow)):
             guardrail_checks=guardrail_checks,
             cost=cost,
             tools_used=result.get("tools_used", []),
+            chart=chart_data,
+            report=report_data,
             execution_time_ms=elapsed_ms,
         )
 

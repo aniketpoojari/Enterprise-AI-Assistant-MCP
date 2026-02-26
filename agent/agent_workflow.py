@@ -361,13 +361,53 @@ class EnterpriseAssistantWorkflow:
 
             result = self.graph.invoke(initial_state)
 
-            # Extract final response
+            # Extract final response and tool results
             messages = result.get("messages", [])
             final_response = ""
+            chart_result = {}
+            report_result = {}
+
+            import json
+
+            from langchain_core.messages import ToolMessage
+
             for msg in reversed(messages):
-                if isinstance(msg, AIMessage) and msg.content and not msg.tool_calls:
+                # Get the last text response
+                if (
+                    not final_response
+                    and isinstance(msg, AIMessage)
+                    and msg.content
+                    and not msg.tool_calls
+                ):
                     final_response = msg.content
-                    break
+
+                # Extract chart data if not already found
+                if not chart_result and isinstance(msg, ToolMessage):
+                    try:
+                        data = json.loads(msg.content)
+                        if data.get("chart_base64"):
+                            chart_result = {
+                                "chart_base64": data["chart_base64"],
+                                "chart_type": data.get("chart_type", "bar"),
+                                "data_summary": data.get("data_summary", ""),
+                            }
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+
+                # Extract report data if not already found
+                if not report_result and isinstance(msg, ToolMessage):
+                    try:
+                        data = json.loads(msg.content)
+                        if data.get("markdown"):
+                            report_result = {
+                                "markdown": data["markdown"],
+                                "key_findings": data.get("key_findings", []),
+                                "data_quality_notes": data.get(
+                                    "data_quality_notes", []
+                                ),
+                            }
+                    except (json.JSONDecodeError, TypeError):
+                        pass
 
             # Aggregate costs
             total_cost = {
@@ -388,6 +428,8 @@ class EnterpriseAssistantWorkflow:
                 "guardrail_results": result.get("guardrail_results", []),
                 "cost": total_cost,
                 "messages": messages,
+                "chart_result": chart_result,
+                "report_result": report_result,
             }
 
         except Exception as e:
