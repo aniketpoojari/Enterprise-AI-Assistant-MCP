@@ -1,6 +1,6 @@
 """Guardrail orchestration service - coordinates input and output guardrails."""
 
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 from guardrails.input_guardrails import InputGuardrails
 from guardrails.output_guardrails import OutputGuardrails
@@ -32,7 +32,9 @@ class GuardrailService:
         """
         results = self.input_guardrails.check_all(user_input)
         is_blocked = self.input_guardrails.is_blocked(results)
-        block_reason = self.input_guardrails.get_block_reason(results) if is_blocked else ""
+        block_reason = (
+            self.input_guardrails.get_block_reason(results) if is_blocked else ""
+        )
 
         # Update stats
         self._stats["total_checks"] += 1
@@ -50,8 +52,13 @@ class GuardrailService:
             "block_reason": block_reason,
         }
 
-    def check_output(self, sql: str = "", rows: List[Dict] = None,
-                     columns: List[str] = None, response_text: str = "") -> Dict[str, Any]:
+    def check_output(
+        self,
+        sql: str = "",
+        rows: List[Dict] = None,
+        columns: List[str] = None,
+        response_text: str = "",
+    ) -> Dict[str, Any]:
         """Run all output guardrails.
 
         Returns:

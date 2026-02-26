@@ -1,9 +1,10 @@
 """Configuration loader for the Enterprise AI Assistant."""
 
 import os
-import yaml
 from pathlib import Path
 from typing import Any, Optional
+
+import yaml
 from dotenv import load_dotenv
 
 # Load .env BEFORE any other imports that might need env vars
@@ -27,6 +28,7 @@ if not _env_loaded:
     pass
 
 from logger.logging import get_logger
+
 logger = get_logger(__name__)
 
 
@@ -49,7 +51,7 @@ class ConfigLoader:
         try:
             config_path = Path(self.config_file)
             if config_path.exists():
-                with open(config_path, 'r') as file:
+                with open(config_path, "r") as file:
                     return yaml.safe_load(file) or {}
             else:
                 logger.warning(f"Config file {self.config_file} not found.")
@@ -63,7 +65,7 @@ class ConfigLoader:
     def get(self, key: str, default: Any = None) -> Any:
         """Get configuration value using dot notation."""
         try:
-            keys = key.split('.')
+            keys = key.split(".")
             value = self.config_data
 
             for k in keys:

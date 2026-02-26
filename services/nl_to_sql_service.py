@@ -1,13 +1,13 @@
 """Natural language to SQL conversion service."""
 
-from typing import Dict, Any
+from typing import Any, Dict
 
-from utils.model_loader import ModelLoader
-from utils.sql_utils import validate_sql, extract_sql_from_response
+from logger.logging import get_logger
 from models.database import DatabaseManager
 from prompt_library.prompts import NL_TO_SQL_SYSTEM_PROMPT, NL_TO_SQL_USER_PROMPT
 from utils.cost_tracker import CostTracker
-from logger.logging import get_logger
+from utils.model_loader import ModelLoader
+from utils.sql_utils import extract_sql_from_response, validate_sql
 
 logger = get_logger(__name__)
 
@@ -35,7 +35,8 @@ class NLToSQLService:
             system_prompt = NL_TO_SQL_SYSTEM_PROMPT.format(schema=self.schema)
             user_prompt = NL_TO_SQL_USER_PROMPT.format(question=question)
 
-            from langchain_core.messages import SystemMessage, HumanMessage
+            from langchain_core.messages import HumanMessage, SystemMessage
+
             messages = [
                 SystemMessage(content=system_prompt),
                 HumanMessage(content=user_prompt),
@@ -106,4 +107,10 @@ class NLToSQLService:
         except Exception as e:
             error_msg = f"Error in NLToSQLService.execute -> {str(e)}"
             logger.error(error_msg)
-            return {"sql": "", "error": error_msg, "columns": [], "rows": [], "row_count": 0}
+            return {
+                "sql": "",
+                "error": error_msg,
+                "columns": [],
+                "rows": [],
+                "row_count": 0,
+            }

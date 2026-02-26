@@ -1,11 +1,12 @@
 """Chart generation service for the Enterprise AI Assistant."""
 
-import io
 import base64
-from typing import Dict, Any, List
+import io
+from typing import Any, Dict, List
 
 import matplotlib
-matplotlib.use('Agg')  # Non-interactive backend for server use
+
+matplotlib.use("Agg")  # Non-interactive backend for server use
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
@@ -19,7 +20,7 @@ class VisualizationService:
 
     def __init__(self):
         try:
-            plt.style.use('seaborn-v0_8-whitegrid')
+            plt.style.use("seaborn-v0_8-whitegrid")
             logger.info("VisualizationService initialized")
 
         except Exception as e:
@@ -27,8 +28,14 @@ class VisualizationService:
             logger.error(error_msg)
             raise Exception(error_msg)
 
-    def generate_chart(self, data: Dict[str, Any], chart_type: str = "bar",
-                       title: str = "", x_label: str = "", y_label: str = "") -> Dict[str, Any]:
+    def generate_chart(
+        self,
+        data: Dict[str, Any],
+        chart_type: str = "bar",
+        title: str = "",
+        x_label: str = "",
+        y_label: str = "",
+    ) -> Dict[str, Any]:
         """Generate a chart from query result data.
 
         Args:
@@ -46,7 +53,11 @@ class VisualizationService:
             rows = data.get("rows", [])
 
             if not rows or not columns:
-                return {"error": "No data to visualize", "chart_base64": "", "chart_type": chart_type}
+                return {
+                    "error": "No data to visualize",
+                    "chart_base64": "",
+                    "chart_type": chart_type,
+                }
 
             # Auto-detect x and y columns if not enough info
             x_col, y_cols = self._detect_axes(columns, rows)
@@ -61,7 +72,11 @@ class VisualizationService:
             y_data_dict = {}
             for y_col in y_cols:
                 y_data_dict[y_col] = [
-                    float(row[y_col]) if isinstance(row, dict) else float(row[columns.index(y_col)])
+                    (
+                        float(row[y_col])
+                        if isinstance(row, dict)
+                        else float(row[columns.index(y_col)])
+                    )
                     for row in rows
                 ]
 
@@ -73,28 +88,32 @@ class VisualizationService:
             elif chart_type == "line":
                 self._create_line_chart(ax, x_data, y_data_dict, y_cols)
             elif chart_type == "pie":
-                self._create_pie_chart(ax, x_data, list(y_data_dict.values())[0] if y_data_dict else [])
+                self._create_pie_chart(
+                    ax, x_data, list(y_data_dict.values())[0] if y_data_dict else []
+                )
             elif chart_type == "scatter":
                 self._create_scatter_chart(ax, x_data, y_data_dict, y_cols)
             else:
                 self._create_bar_chart(ax, x_data, y_data_dict, y_cols)
 
-            ax.set_title(title or f"{y_label} by {x_label}", fontsize=14, fontweight='bold')
+            ax.set_title(
+                title or f"{y_label} by {x_label}", fontsize=14, fontweight="bold"
+            )
             if chart_type != "pie":
                 ax.set_xlabel(x_label, fontsize=11)
                 ax.set_ylabel(y_label, fontsize=11)
 
                 # Rotate x labels if too many
                 if len(x_data) > 6:
-                    plt.xticks(rotation=45, ha='right')
+                    plt.xticks(rotation=45, ha="right")
 
             plt.tight_layout()
 
             # Convert to base64
             buf = io.BytesIO()
-            fig.savefig(buf, format='png', dpi=100, bbox_inches='tight')
+            fig.savefig(buf, format="png", dpi=100, bbox_inches="tight")
             buf.seek(0)
-            chart_base64 = base64.b64encode(buf.read()).decode('utf-8')
+            chart_base64 = base64.b64encode(buf.read()).decode("utf-8")
             plt.close(fig)
 
             # Generate summary
@@ -109,7 +128,7 @@ class VisualizationService:
         except Exception as e:
             error_msg = f"Error generating chart -> {str(e)}"
             logger.error(error_msg)
-            plt.close('all')
+            plt.close("all")
             return {"error": error_msg, "chart_base64": "", "chart_type": chart_type}
 
     def _detect_axes(self, columns: List[str], rows: List[Dict]) -> tuple:
@@ -119,7 +138,11 @@ class VisualizationService:
 
         for col in columns[1:]:
             # Check if column is numeric
-            sample = rows[0][col] if isinstance(rows[0], dict) else rows[0][columns.index(col)]
+            sample = (
+                rows[0][col]
+                if isinstance(rows[0], dict)
+                else rows[0][columns.index(col)]
+            )
             try:
                 float(sample)
                 y_cols.append(col)
@@ -139,6 +162,7 @@ class VisualizationService:
             ax.bar(x_str, list(y_data_dict.values())[0], color=colors)
         else:
             import numpy as np
+
             x_pos = np.arange(len(x_str))
             width = 0.8 / len(y_cols)
             for i, col in enumerate(y_cols):
@@ -151,7 +175,9 @@ class VisualizationService:
     def _create_line_chart(self, ax, x_data, y_data_dict, y_cols):
         """Create a line chart."""
         for col in y_cols:
-            ax.plot(range(len(x_data)), y_data_dict[col], marker='o', label=col, linewidth=2)
+            ax.plot(
+                range(len(x_data)), y_data_dict[col], marker="o", label=col, linewidth=2
+            )
         ax.set_xticks(range(len(x_data)))
         ax.set_xticklabels([str(x) for x in x_data])
         if len(y_cols) > 1:
@@ -161,8 +187,10 @@ class VisualizationService:
         """Create a pie chart."""
         str_labels = [str(l) for l in labels]
         colors = plt.cm.Set2(range(len(str_labels)))
-        ax.pie(values, labels=str_labels, autopct='%1.1f%%', colors=colors, startangle=90)
-        ax.axis('equal')
+        ax.pie(
+            values, labels=str_labels, autopct="%1.1f%%", colors=colors, startangle=90
+        )
+        ax.axis("equal")
 
     def _create_scatter_chart(self, ax, x_data, y_data_dict, y_cols):
         """Create a scatter plot."""
@@ -181,5 +209,7 @@ class VisualizationService:
         parts = [f"Chart shows {len(x_data)} data points."]
         for col in y_cols:
             values = y_data_dict[col]
-            parts.append(f"{col}: min={min(values):.2f}, max={max(values):.2f}, avg={sum(values)/len(values):.2f}")
+            parts.append(
+                f"{col}: min={min(values):.2f}, max={max(values):.2f}, avg={sum(values)/len(values):.2f}"
+            )
         return " ".join(parts)

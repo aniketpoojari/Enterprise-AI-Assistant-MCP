@@ -1,9 +1,10 @@
 """LangChain tool wrapper for report generation - used by LangGraph agent."""
 
 from langchain_core.tools import tool
-from mcp_server.sql_tool import SQLTool
-from mcp_server.report_tool import ReportMCPTool
+
 from logger.logging import get_logger
+from mcp_server.report_tool import ReportMCPTool
+from mcp_server.sql_tool import SQLTool
 
 logger = get_logger(__name__)
 
@@ -26,8 +27,7 @@ def _get_sql_tool():
 
 
 @tool
-def generate_report(natural_language_query: str,
-                    report_type: str = "summary") -> dict:
+def generate_report(natural_language_query: str, report_type: str = "summary") -> dict:
     """Generate a markdown business report by querying the database and analyzing results.
 
     This tool queries the database first, then creates a report. You do NOT need

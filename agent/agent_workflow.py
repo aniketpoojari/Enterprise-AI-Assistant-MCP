@@ -1,21 +1,24 @@
 """LangGraph agent workflow for the Enterprise AI Assistant."""
 
-from langgraph.graph import StateGraph, END, START
+from typing import Any, Dict
+
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
-from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
-from typing import Dict, Any
 
 from agent.state import AgentState
-from tools.sql_query_tool import query_database
+from logger.logging import get_logger
+from prompt_library.prompts import (
+    AGENT_SYSTEM_PROMPT,
+    GENERAL_RESPONSE_PROMPT,
+    ROUTER_PROMPT,
+)
+from services.guardrail_service import GuardrailService
 from tools.chart_tool import generate_chart
 from tools.report_tool import generate_report
-from utils.model_loader import ModelLoader
+from tools.sql_query_tool import query_database
 from utils.cost_tracker import CostTracker
-from services.guardrail_service import GuardrailService
-from prompt_library.prompts import (
-    ROUTER_PROMPT, AGENT_SYSTEM_PROMPT, GENERAL_RESPONSE_PROMPT
-)
-from logger.logging import get_logger
+from utils.model_loader import ModelLoader
 
 logger = get_logger(__name__)
 
@@ -38,7 +41,9 @@ class EnterpriseAssistantWorkflow:
             logger.info("EnterpriseAssistantWorkflow initialized")
 
         except Exception as e:
-            error_msg = f"Error in EnterpriseAssistantWorkflow Initialization -> {str(e)}"
+            error_msg = (
+                f"Error in EnterpriseAssistantWorkflow Initialization -> {str(e)}"
+            )
             logger.error(error_msg)
             raise Exception(error_msg)
 
@@ -63,7 +68,7 @@ class EnterpriseAssistantWorkflow:
                 {
                     "general": "general_response",
                     "data_query": "guardrail_check",
-                }
+                },
             )
             graph.add_conditional_edges(
                 "guardrail_check",
@@ -71,7 +76,7 @@ class EnterpriseAssistantWorkflow:
                 {
                     "allowed": "agent",
                     "blocked": END,
-                }
+                },
             )
             graph.add_conditional_edges(
                 "agent",
@@ -84,7 +89,7 @@ class EnterpriseAssistantWorkflow:
                 {
                     "allowed": "agent",
                     "blocked": END,
-                }
+                },
             )
             graph.add_edge("general_response", END)
 
@@ -100,7 +105,11 @@ class EnterpriseAssistantWorkflow:
         """Classify user intent."""
         try:
             last_message = state["messages"][-1]
-            query = last_message.content if hasattr(last_message, 'content') else str(last_message)
+            query = (
+                last_message.content
+                if hasattr(last_message, "content")
+                else str(last_message)
+            )
 
             prompt = ROUTER_PROMPT.format(query=query)
             response = self.llm.invoke(prompt)
@@ -121,14 +130,22 @@ class EnterpriseAssistantWorkflow:
         """Run input guardrails."""
         try:
             last_message = state["messages"][-1]
-            query = last_message.content if hasattr(last_message, 'content') else str(last_message)
+            query = (
+                last_message.content
+                if hasattr(last_message, "content")
+                else str(last_message)
+            )
 
             result = self.guardrail_service.check_input(query)
 
             if not result["allowed"]:
                 return {
                     "guardrail_results": result["results"],
-                    "messages": [AIMessage(content=f"I can't process that request. {result['block_reason']}")],
+                    "messages": [
+                        AIMessage(
+                            content=f"I can't process that request. {result['block_reason']}"
+                        )
+                    ],
                 }
 
             return {"guardrail_results": result["results"]}
@@ -157,7 +174,11 @@ class EnterpriseAssistantWorkflow:
         except Exception as e:
             logger.error(f"Error in agent node -> {str(e)}")
             return {
-                "messages": [AIMessage(content=f"I encountered an error processing your request: {str(e)}")],
+                "messages": [
+                    AIMessage(
+                        content=f"I encountered an error processing your request: {str(e)}"
+                    )
+                ],
             }
 
     def output_guardrail_node(self, state: AgentState) -> Dict[str, Any]:
@@ -165,9 +186,10 @@ class EnterpriseAssistantWorkflow:
         try:
             # Find the last tool message
             for msg in reversed(state["messages"]):
-                if hasattr(msg, 'content') and isinstance(msg.content, str):
+                if hasattr(msg, "content") and isinstance(msg.content, str):
                     # Check if it contains SQL
                     import json
+
                     try:
                         data = json.loads(msg.content)
                         sql = data.get("sql", "")
@@ -181,17 +203,31 @@ class EnterpriseAssistantWorkflow:
 
                             if not result["allowed"]:
                                 return {
-                                    "messages": [AIMessage(content="The generated query was blocked by safety checks. Please rephrase your question.")],
-                                    "guardrail_results": state.get("guardrail_results", []) + result["results"],
+                                    "messages": [
+                                        AIMessage(
+                                            content="The generated query was blocked by safety checks. Please rephrase your question."
+                                        )
+                                    ],
+                                    "guardrail_results": state.get(
+                                        "guardrail_results", []
+                                    )
+                                    + result["results"],
                                 }
 
                             # Replace rows with masked version
-                            if result.get("masked_rows") and result["masked_rows"] != rows:
+                            if (
+                                result.get("masked_rows")
+                                and result["masked_rows"] != rows
+                            ):
                                 data["rows"] = result["masked_rows"]
                                 from langchain_core.messages import ToolMessage
+
                                 # Update with masked data
                                 return {
-                                    "guardrail_results": state.get("guardrail_results", []) + result["results"],
+                                    "guardrail_results": state.get(
+                                        "guardrail_results", []
+                                    )
+                                    + result["results"],
                                 }
                     except (json.JSONDecodeError, TypeError):
                         pass
@@ -206,7 +242,11 @@ class EnterpriseAssistantWorkflow:
         """Handle general/off-topic queries."""
         try:
             last_message = state["messages"][-1]
-            query = last_message.content if hasattr(last_message, 'content') else str(last_message)
+            query = (
+                last_message.content
+                if hasattr(last_message, "content")
+                else str(last_message)
+            )
 
             prompt = GENERAL_RESPONSE_PROMPT.format(query=query)
             response = self.llm.invoke(prompt)
@@ -220,7 +260,11 @@ class EnterpriseAssistantWorkflow:
         except Exception as e:
             logger.error(f"Error in general response -> {str(e)}")
             return {
-                "messages": [AIMessage(content="Hello! I'm the Enterprise AI Assistant. I can help you analyze e-commerce data. Try asking about products, orders, customers, or revenue!")],
+                "messages": [
+                    AIMessage(
+                        content="Hello! I'm the Enterprise AI Assistant. I can help you analyze e-commerce data. Try asking about products, orders, customers, or revenue!"
+                    )
+                ],
             }
 
     # --- Edge condition functions ---
@@ -275,7 +319,12 @@ class EnterpriseAssistantWorkflow:
                     break
 
             # Aggregate costs
-            total_cost = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0, "estimated_cost_usd": 0}
+            total_cost = {
+                "prompt_tokens": 0,
+                "completion_tokens": 0,
+                "total_tokens": 0,
+                "estimated_cost_usd": 0,
+            }
             for c in result.get("cost_info", []):
                 total_cost["prompt_tokens"] += c.get("prompt_tokens", 0)
                 total_cost["completion_tokens"] += c.get("completion_tokens", 0)

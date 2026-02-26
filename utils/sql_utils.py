@@ -9,15 +9,32 @@ logger = get_logger(__name__)
 
 # Dangerous SQL operations that should never appear in generated queries
 BLOCKED_OPERATIONS = [
-    "DROP", "DELETE", "UPDATE", "INSERT", "ALTER", "CREATE",
-    "TRUNCATE", "EXEC", "EXECUTE", "GRANT", "REVOKE",
-    "ATTACH", "DETACH", "VACUUM", "REINDEX", "PRAGMA",
+    "DROP",
+    "DELETE",
+    "UPDATE",
+    "INSERT",
+    "ALTER",
+    "CREATE",
+    "TRUNCATE",
+    "EXEC",
+    "EXECUTE",
+    "GRANT",
+    "REVOKE",
+    "ATTACH",
+    "DETACH",
+    "VACUUM",
+    "REINDEX",
+    "PRAGMA",
 ]
 
 # Allowed tables (must match schema.sql)
 ALLOWED_TABLES = [
-    "customers", "products", "orders", "order_items",
-    "reviews", "inventory_log",
+    "customers",
+    "products",
+    "orders",
+    "order_items",
+    "reviews",
+    "inventory_log",
 ]
 
 
@@ -39,7 +56,7 @@ def validate_sql(sql: str, allowed_tables: List[str] = None) -> Tuple[bool, str]
     # Check for blocked operations
     for op in BLOCKED_OPERATIONS:
         # Match as whole word to avoid false positives (e.g., "UPDATED_AT")
-        pattern = rf'\b{op}\b'
+        pattern = rf"\b{op}\b"
         # Skip checking inside string literals by removing them first
         sql_no_strings = re.sub(r"'[^']*'", "", sql_upper)
         if re.search(pattern, sql_no_strings):
@@ -64,29 +81,53 @@ def validate_sql(sql: str, allowed_tables: List[str] = None) -> Tuple[bool, str]
 
     # Collect CTE names so we can exclude them
     cte_names = set()
-    cte_pattern = r'\bWITH\s+(.*?)\bSELECT\b'
+    cte_pattern = r"\bWITH\s+(.*?)\bSELECT\b"
     cte_block = re.search(cte_pattern, sql_clean, re.DOTALL)
     if cte_block:
-        for m in re.finditer(r'(\w+)\s+AS\s*\(', cte_block.group(1)):
+        for m in re.finditer(r"(\w+)\s+AS\s*\(", cte_block.group(1)):
             cte_names.add(m.group(1).lower())
 
     # Match table names after FROM/JOIN, but skip:
     #   - "(" after the name (subquery or function)
     #   - FROM preceded by EXTRACT/DISTINCT/etc. (not a table clause)
-    table_pattern = r'\b(?:FROM|JOIN)\s+(\w+)(?!\s*\()'
+    table_pattern = r"\b(?:FROM|JOIN)\s+(\w+)(?!\s*\()"
     matches = re.findall(table_pattern, sql_clean)
     referenced_tables = set(t.lower() for t in matches)
 
     # Remove CTE names and common SQL keywords that aren't tables
-    sql_keywords = {"select", "where", "and", "or", "not", "null", "as",
-                    "on", "in", "is", "by", "asc", "desc", "case", "when",
-                    "then", "else", "end", "between", "like", "having",
-                    "union", "all", "exists", "each", "lateral"}
+    sql_keywords = {
+        "select",
+        "where",
+        "and",
+        "or",
+        "not",
+        "null",
+        "as",
+        "on",
+        "in",
+        "is",
+        "by",
+        "asc",
+        "desc",
+        "case",
+        "when",
+        "then",
+        "else",
+        "end",
+        "between",
+        "like",
+        "having",
+        "union",
+        "all",
+        "exists",
+        "each",
+        "lateral",
+    }
     referenced_tables -= cte_names
     referenced_tables -= sql_keywords
 
     # Also remove any word captured from EXTRACT(... FROM column_name)
-    extract_pattern = r'\bEXTRACT\s*\([^)]*\bFROM\s+(\w+)'
+    extract_pattern = r"\bEXTRACT\s*\([^)]*\bFROM\s+(\w+)"
     for m in re.finditer(extract_pattern, sql_clean):
         referenced_tables.discard(m.group(1).lower())
 
@@ -124,13 +165,13 @@ def sanitize_sql(sql: str) -> str:
 def extract_sql_from_response(text: str) -> str:
     """Extract SQL query from an LLM response that may contain markdown or explanations."""
     # Try to find SQL in code blocks
-    code_block_pattern = r'```(?:sql)?\s*\n?(.*?)\n?```'
+    code_block_pattern = r"```(?:sql)?\s*\n?(.*?)\n?```"
     matches = re.findall(code_block_pattern, text, re.DOTALL | re.IGNORECASE)
     if matches:
         return sanitize_sql(matches[0])
 
     # Look for SELECT statement in the text
-    select_pattern = r'((?:WITH\s+.*?\s+AS\s*\(.*?\)\s*)?SELECT\s+.*?)(?:\n\n|\Z)'
+    select_pattern = r"((?:WITH\s+.*?\s+AS\s*\(.*?\)\s*)?SELECT\s+.*?)(?:\n\n|\Z)"
     matches = re.findall(select_pattern, text, re.DOTALL | re.IGNORECASE)
     if matches:
         return sanitize_sql(matches[0])

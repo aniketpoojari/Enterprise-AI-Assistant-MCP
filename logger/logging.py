@@ -4,7 +4,11 @@ import logging
 from pathlib import Path
 
 
-def setup_logging(log_level: str = "INFO", log_file: str = None, format: str = "%(asctime)s - %(levelname)s - %(message)s"):
+def setup_logging(
+    log_level: str = "INFO",
+    log_file: str = None,
+    format: str = "%(asctime)s - %(levelname)s - %(message)s",
+):
     """Simple logging setup."""
     try:
 
@@ -18,8 +22,8 @@ def setup_logging(log_level: str = "INFO", log_file: str = None, format: str = "
             format=format,
             handlers=[
                 logging.StreamHandler(),  # Console
-                logging.FileHandler(log_file) if log_file else logging.NullHandler()
-            ]
+                logging.FileHandler(log_file) if log_file else logging.NullHandler(),
+            ],
         )
 
     except Exception as e:

@@ -1,7 +1,7 @@
 """Generate realistic e-commerce demo data for the Enterprise AI Assistant."""
 
-import sqlite3
 import random
+import sqlite3
 import string
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -26,12 +26,24 @@ CATEGORIES = {
     },
     "Home & Kitchen": {
         "subcategories": ["Cookware", "Furniture", "Decor", "Appliances", "Bedding"],
-        "brands": ["HomeEssentials", "CozyLiving", "KitchenPro", "ModernNest", "PureLiving"],
+        "brands": [
+            "HomeEssentials",
+            "CozyLiving",
+            "KitchenPro",
+            "ModernNest",
+            "PureLiving",
+        ],
         "price_range": (14.99, 899.99),
         "cost_ratio": (0.35, 0.55),
     },
     "Books": {
-        "subcategories": ["Fiction", "Non-Fiction", "Technical", "Self-Help", "Children"],
+        "subcategories": [
+            "Fiction",
+            "Non-Fiction",
+            "Technical",
+            "Self-Help",
+            "Children",
+        ],
         "brands": ["PageTurner", "MindGrowth", "TechReads", "StoryHouse", "KidsWorld"],
         "price_range": (7.99, 59.99),
         "cost_ratio": (0.2, 0.4),
@@ -49,19 +61,37 @@ CATEGORIES = {
         "cost_ratio": (0.15, 0.35),
     },
     "Toys": {
-        "subcategories": ["Educational", "Action Figures", "Board Games", "Building Sets", "Dolls"],
+        "subcategories": [
+            "Educational",
+            "Action Figures",
+            "Board Games",
+            "Building Sets",
+            "Dolls",
+        ],
         "brands": ["FunLearn", "HeroWorld", "GameMaster", "BuildIt", "DreamPlay"],
         "price_range": (9.99, 149.99),
         "cost_ratio": (0.25, 0.45),
     },
     "Office": {
-        "subcategories": ["Supplies", "Furniture", "Technology", "Organization", "Writing"],
+        "subcategories": [
+            "Supplies",
+            "Furniture",
+            "Technology",
+            "Organization",
+            "Writing",
+        ],
         "brands": ["WorkSmart", "DeskPro", "OfficeTech", "NeatSpace", "PenCraft"],
         "price_range": (4.99, 599.99),
         "cost_ratio": (0.3, 0.5),
     },
     "Garden": {
-        "subcategories": ["Tools", "Plants", "Outdoor Furniture", "Lighting", "Irrigation"],
+        "subcategories": [
+            "Tools",
+            "Plants",
+            "Outdoor Furniture",
+            "Lighting",
+            "Irrigation",
+        ],
         "brands": ["GreenThumb", "GardenPro", "OutdoorLife", "SunGlow", "AquaGrow"],
         "price_range": (7.99, 399.99),
         "cost_ratio": (0.3, 0.5),
@@ -75,47 +105,188 @@ CATEGORIES = {
 }
 
 FIRST_NAMES = [
-    "James", "Mary", "Robert", "Patricia", "John", "Jennifer", "Michael", "Linda",
-    "David", "Elizabeth", "William", "Barbara", "Richard", "Susan", "Joseph", "Jessica",
-    "Thomas", "Sarah", "Christopher", "Karen", "Charles", "Lisa", "Daniel", "Nancy",
-    "Matthew", "Betty", "Anthony", "Margaret", "Mark", "Sandra", "Donald", "Ashley",
-    "Steven", "Kimberly", "Paul", "Emily", "Andrew", "Donna", "Joshua", "Michelle",
-    "Kenneth", "Carol", "Kevin", "Amanda", "Brian", "Dorothy", "George", "Melissa",
-    "Timothy", "Deborah", "Ronald", "Stephanie", "Edward", "Rebecca", "Jason", "Sharon",
-    "Jeffrey", "Laura", "Ryan", "Cynthia", "Jacob", "Kathleen", "Gary", "Amy",
-    "Nicholas", "Angela", "Eric", "Shirley", "Jonathan", "Anna", "Stephen", "Brenda",
+    "James",
+    "Mary",
+    "Robert",
+    "Patricia",
+    "John",
+    "Jennifer",
+    "Michael",
+    "Linda",
+    "David",
+    "Elizabeth",
+    "William",
+    "Barbara",
+    "Richard",
+    "Susan",
+    "Joseph",
+    "Jessica",
+    "Thomas",
+    "Sarah",
+    "Christopher",
+    "Karen",
+    "Charles",
+    "Lisa",
+    "Daniel",
+    "Nancy",
+    "Matthew",
+    "Betty",
+    "Anthony",
+    "Margaret",
+    "Mark",
+    "Sandra",
+    "Donald",
+    "Ashley",
+    "Steven",
+    "Kimberly",
+    "Paul",
+    "Emily",
+    "Andrew",
+    "Donna",
+    "Joshua",
+    "Michelle",
+    "Kenneth",
+    "Carol",
+    "Kevin",
+    "Amanda",
+    "Brian",
+    "Dorothy",
+    "George",
+    "Melissa",
+    "Timothy",
+    "Deborah",
+    "Ronald",
+    "Stephanie",
+    "Edward",
+    "Rebecca",
+    "Jason",
+    "Sharon",
+    "Jeffrey",
+    "Laura",
+    "Ryan",
+    "Cynthia",
+    "Jacob",
+    "Kathleen",
+    "Gary",
+    "Amy",
+    "Nicholas",
+    "Angela",
+    "Eric",
+    "Shirley",
+    "Jonathan",
+    "Anna",
+    "Stephen",
+    "Brenda",
 ]
 
 LAST_NAMES = [
-    "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis",
-    "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson",
-    "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson",
-    "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson", "Walker",
-    "Young", "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores",
-    "Green", "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter",
+    "Smith",
+    "Johnson",
+    "Williams",
+    "Brown",
+    "Jones",
+    "Garcia",
+    "Miller",
+    "Davis",
+    "Rodriguez",
+    "Martinez",
+    "Hernandez",
+    "Lopez",
+    "Gonzalez",
+    "Wilson",
+    "Anderson",
+    "Thomas",
+    "Taylor",
+    "Moore",
+    "Jackson",
+    "Martin",
+    "Lee",
+    "Perez",
+    "Thompson",
+    "White",
+    "Harris",
+    "Sanchez",
+    "Clark",
+    "Ramirez",
+    "Lewis",
+    "Robinson",
+    "Walker",
+    "Young",
+    "Allen",
+    "King",
+    "Wright",
+    "Scott",
+    "Torres",
+    "Nguyen",
+    "Hill",
+    "Flores",
+    "Green",
+    "Adams",
+    "Nelson",
+    "Baker",
+    "Hall",
+    "Rivera",
+    "Campbell",
+    "Mitchell",
+    "Carter",
 ]
 
 CITIES = [
-    ("New York", "NY"), ("Los Angeles", "CA"), ("Chicago", "IL"), ("Houston", "TX"),
-    ("Phoenix", "AZ"), ("Philadelphia", "PA"), ("San Antonio", "TX"), ("San Diego", "CA"),
-    ("Dallas", "TX"), ("San Jose", "CA"), ("Austin", "TX"), ("Jacksonville", "FL"),
-    ("Fort Worth", "TX"), ("Columbus", "OH"), ("Charlotte", "NC"), ("San Francisco", "CA"),
-    ("Indianapolis", "IN"), ("Seattle", "WA"), ("Denver", "CO"), ("Nashville", "TN"),
-    ("Portland", "OR"), ("Boston", "MA"), ("Atlanta", "GA"), ("Miami", "FL"),
-    ("Minneapolis", "MN"), ("Detroit", "MI"), ("Tampa", "FL"), ("Pittsburgh", "PA"),
+    ("New York", "NY"),
+    ("Los Angeles", "CA"),
+    ("Chicago", "IL"),
+    ("Houston", "TX"),
+    ("Phoenix", "AZ"),
+    ("Philadelphia", "PA"),
+    ("San Antonio", "TX"),
+    ("San Diego", "CA"),
+    ("Dallas", "TX"),
+    ("San Jose", "CA"),
+    ("Austin", "TX"),
+    ("Jacksonville", "FL"),
+    ("Fort Worth", "TX"),
+    ("Columbus", "OH"),
+    ("Charlotte", "NC"),
+    ("San Francisco", "CA"),
+    ("Indianapolis", "IN"),
+    ("Seattle", "WA"),
+    ("Denver", "CO"),
+    ("Nashville", "TN"),
+    ("Portland", "OR"),
+    ("Boston", "MA"),
+    ("Atlanta", "GA"),
+    ("Miami", "FL"),
+    ("Minneapolis", "MN"),
+    ("Detroit", "MI"),
+    ("Tampa", "FL"),
+    ("Pittsburgh", "PA"),
 ]
 
 REVIEW_TITLES_POSITIVE = [
-    "Excellent product!", "Highly recommend!", "Best purchase ever",
-    "Great value for money", "Exceeded expectations", "Love it!",
-    "Perfect for my needs", "Outstanding quality", "Would buy again",
-    "Fantastic!", "Very satisfied", "Top notch",
+    "Excellent product!",
+    "Highly recommend!",
+    "Best purchase ever",
+    "Great value for money",
+    "Exceeded expectations",
+    "Love it!",
+    "Perfect for my needs",
+    "Outstanding quality",
+    "Would buy again",
+    "Fantastic!",
+    "Very satisfied",
+    "Top notch",
 ]
 
 REVIEW_TITLES_NEGATIVE = [
-    "Disappointed", "Not as expected", "Poor quality",
-    "Would not recommend", "Broke after a week", "Waste of money",
-    "Terrible experience", "Not worth it", "Very dissatisfied",
+    "Disappointed",
+    "Not as expected",
+    "Poor quality",
+    "Would not recommend",
+    "Broke after a week",
+    "Waste of money",
+    "Terrible experience",
+    "Not worth it",
+    "Very dissatisfied",
 ]
 
 REVIEW_BODIES_POSITIVE = [
@@ -138,7 +309,7 @@ REVIEW_BODIES_NEGATIVE = [
 def generate_tracking_number():
     """Generate a realistic tracking number."""
     prefix = random.choice(["1Z", "94", "92", "JD"])
-    digits = ''.join(random.choices(string.digits, k=12))
+    digits = "".join(random.choices(string.digits, k=12))
     return f"{prefix}{digits}"
 
 
@@ -151,7 +322,7 @@ def seed_database(db_path: str = "database/ecommerce.db"):
 
     # Read and execute schema
     schema_path = Path(__file__).parent / "schema.sql"
-    with open(schema_path, 'r') as f:
+    with open(schema_path, "r") as f:
         schema_sql = f.read()
 
     conn = sqlite3.connect(str(db_path))
@@ -189,14 +360,26 @@ def seed_database(db_path: str = "database/ecommerce.db"):
         days_ago = random.randint(1, 730)
         created_at = datetime.now() - timedelta(days=days_ago)
 
-        customers.append((
-            first, last, email, phone, address, city, state, zip_code,
-            "US", segment, 0, created_at.strftime("%Y-%m-%d %H:%M:%S")
-        ))
+        customers.append(
+            (
+                first,
+                last,
+                email,
+                phone,
+                address,
+                city,
+                state,
+                zip_code,
+                "US",
+                segment,
+                0,
+                created_at.strftime("%Y-%m-%d %H:%M:%S"),
+            )
+        )
 
     cursor.executemany(
         "INSERT INTO customers (first_name, last_name, email, phone, address, city, state, zip_code, country, segment, lifetime_value, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        customers
+        customers,
     )
     logger.info(f"Inserted {len(customers)} customers")
 
@@ -221,28 +404,54 @@ def seed_database(db_path: str = "database/ecommerce.db"):
             days_ago = random.randint(1, 730)
             created_at = datetime.now() - timedelta(days=days_ago)
 
-            products.append((
-                name, category, subcat, brand, price, cost, stock,
-                rating, review_count, 1, created_at.strftime("%Y-%m-%d %H:%M:%S")
-            ))
+            products.append(
+                (
+                    name,
+                    category,
+                    subcat,
+                    brand,
+                    price,
+                    cost,
+                    stock,
+                    rating,
+                    review_count,
+                    1,
+                    created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                )
+            )
 
     cursor.executemany(
         "INSERT INTO products (name, category, subcategory, brand, price, cost, stock_quantity, rating, review_count, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        products
+        products,
     )
     logger.info(f"Inserted {len(products)} products")
 
     # --- Orders (2000) ---
     orders = []
-    statuses = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled", "Returned"]
+    statuses = [
+        "Pending",
+        "Processing",
+        "Shipped",
+        "Delivered",
+        "Cancelled",
+        "Returned",
+    ]
     status_weights = [0.05, 0.05, 0.1, 0.65, 0.1, 0.05]
-    payment_methods = ["Credit Card", "Debit Card", "PayPal", "Bank Transfer", "Gift Card"]
+    payment_methods = [
+        "Credit Card",
+        "Debit Card",
+        "PayPal",
+        "Bank Transfer",
+        "Gift Card",
+    ]
     payment_weights = [0.4, 0.2, 0.25, 0.1, 0.05]
 
     for _ in range(2000):
         customer_id = random.randint(1, 500)
         days_ago = random.randint(1, 365)
-        order_date = datetime.now() - timedelta(days=days_ago, hours=random.randint(0, 23), minutes=random.randint(0, 59))
+        order_date = datetime.now() - timedelta(
+            days=days_ago, hours=random.randint(0, 23), minutes=random.randint(0, 59)
+        )
         status = random.choices(statuses, weights=status_weights, k=1)[0]
         payment = random.choices(payment_methods, weights=payment_weights, k=1)[0]
         shipping_cost = round(random.choice([0, 4.99, 7.99, 9.99, 14.99]), 2)
@@ -250,16 +459,27 @@ def seed_database(db_path: str = "database/ecommerce.db"):
 
         city, state = random.choice(CITIES)
         shipping_address = f"{random.randint(1, 9999)} {random.choice(['Main', 'Oak', 'Elm'])} St, {city}, {state}"
-        tracking = generate_tracking_number() if status in ["Shipped", "Delivered"] else None
+        tracking = (
+            generate_tracking_number() if status in ["Shipped", "Delivered"] else None
+        )
 
-        orders.append((
-            customer_id, order_date.strftime("%Y-%m-%d %H:%M:%S"), status,
-            0, discount, shipping_cost, payment, shipping_address, tracking
-        ))
+        orders.append(
+            (
+                customer_id,
+                order_date.strftime("%Y-%m-%d %H:%M:%S"),
+                status,
+                0,
+                discount,
+                shipping_cost,
+                payment,
+                shipping_address,
+                tracking,
+            )
+        )
 
     cursor.executemany(
         "INSERT INTO orders (customer_id, order_date, status, total_amount, discount_amount, shipping_cost, payment_method, shipping_address, tracking_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        orders
+        orders,
     )
     logger.info(f"Inserted {len(orders)} orders")
 
@@ -276,7 +496,9 @@ def seed_database(db_path: str = "database/ecommerce.db"):
         row = cursor.fetchone()
         unit_price = row[0] if row else 29.99
 
-        quantity = random.choices([1, 2, 3, 4, 5], weights=[0.5, 0.25, 0.15, 0.05, 0.05], k=1)[0]
+        quantity = random.choices(
+            [1, 2, 3, 4, 5], weights=[0.5, 0.25, 0.15, 0.05, 0.05], k=1
+        )[0]
         discount_pct = random.choice([0, 0, 0, 0, 5, 10, 15, 20])
 
         line_total = unit_price * quantity * (1 - discount_pct / 100)
@@ -286,13 +508,16 @@ def seed_database(db_path: str = "database/ecommerce.db"):
 
     cursor.executemany(
         "INSERT INTO order_items (order_id, product_id, quantity, unit_price, discount_percent) VALUES (?, ?, ?, ?, ?)",
-        order_items
+        order_items,
     )
     logger.info(f"Inserted {len(order_items)} order items")
 
     # Update order totals
     for order_id, total in order_totals.items():
-        cursor.execute("UPDATE orders SET total_amount = ? WHERE order_id = ?", (round(total, 2), order_id))
+        cursor.execute(
+            "UPDATE orders SET total_amount = ? WHERE order_id = ?",
+            (round(total, 2), order_id),
+        )
 
     # Update customer lifetime values
     cursor.execute("""
@@ -307,7 +532,9 @@ def seed_database(db_path: str = "database/ecommerce.db"):
     for _ in range(1500):
         product_id = random.randint(1, 200)
         customer_id = random.randint(1, 500)
-        rating = random.choices([1, 2, 3, 4, 5], weights=[0.05, 0.08, 0.12, 0.35, 0.40], k=1)[0]
+        rating = random.choices(
+            [1, 2, 3, 4, 5], weights=[0.05, 0.08, 0.12, 0.35, 0.40], k=1
+        )[0]
 
         if rating >= 4:
             title = random.choice(REVIEW_TITLES_POSITIVE)
@@ -321,11 +548,22 @@ def seed_database(db_path: str = "database/ecommerce.db"):
         days_ago = random.randint(1, 365)
         created_at = datetime.now() - timedelta(days=days_ago)
 
-        reviews.append((product_id, customer_id, rating, title, body, helpful_votes, verified, created_at.strftime("%Y-%m-%d %H:%M:%S")))
+        reviews.append(
+            (
+                product_id,
+                customer_id,
+                rating,
+                title,
+                body,
+                helpful_votes,
+                verified,
+                created_at.strftime("%Y-%m-%d %H:%M:%S"),
+            )
+        )
 
     cursor.executemany(
         "INSERT INTO reviews (product_id, customer_id, rating, title, body, helpful_votes, verified_purchase, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        reviews
+        reviews,
     )
     logger.info(f"Inserted {len(reviews)} reviews")
 
@@ -356,11 +594,21 @@ def seed_database(db_path: str = "database/ecommerce.db"):
         days_ago = random.randint(1, 365)
         created_at = datetime.now() - timedelta(days=days_ago)
 
-        inv_logs.append((product_id, change_type, qty_change, prev_stock, new_stock, notes, created_at.strftime("%Y-%m-%d %H:%M:%S")))
+        inv_logs.append(
+            (
+                product_id,
+                change_type,
+                qty_change,
+                prev_stock,
+                new_stock,
+                notes,
+                created_at.strftime("%Y-%m-%d %H:%M:%S"),
+            )
+        )
 
     cursor.executemany(
         "INSERT INTO inventory_log (product_id, change_type, quantity_change, previous_stock, new_stock, notes, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        inv_logs
+        inv_logs,
     )
     logger.info(f"Inserted {len(inv_logs)} inventory log entries")
 
@@ -368,7 +616,9 @@ def seed_database(db_path: str = "database/ecommerce.db"):
     conn.close()
 
     logger.info(f"Database seeded successfully at {db_path}")
-    logger.info(f"Summary: 500 customers, 200 products, 2000 orders, 5000 order items, 1500 reviews, 3000 inventory logs")
+    logger.info(
+        f"Summary: 500 customers, 200 products, 2000 orders, 5000 order items, 1500 reviews, 3000 inventory logs"
+    )
 
 
 if __name__ == "__main__":

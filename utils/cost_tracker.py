@@ -1,13 +1,13 @@
 """Token counting and cost estimation for the Enterprise AI Assistant."""
 
 import json
-import uuid
 import time
-from typing import Any, Dict, Optional, Callable
+import uuid
 from functools import wraps
+from typing import Any, Callable, Dict, Optional
 
-from utils.config_loader import ConfigLoader
 from logger.logging import get_logger
+from utils.config_loader import ConfigLoader
 
 logger = get_logger(__name__)
 
@@ -18,8 +18,12 @@ class CostTracker:
     def __init__(self):
         try:
             self.config = ConfigLoader()
-            self.cost_per_1k_input = float(self.config.get("cost.groq_cost_per_1k_input_tokens", 0.00006))
-            self.cost_per_1k_output = float(self.config.get("cost.groq_cost_per_1k_output_tokens", 0.00006))
+            self.cost_per_1k_input = float(
+                self.config.get("cost.groq_cost_per_1k_input_tokens", 0.00006)
+            )
+            self.cost_per_1k_output = float(
+                self.config.get("cost.groq_cost_per_1k_output_tokens", 0.00006)
+            )
             logger.info("CostTracker initialized")
 
         except Exception as e:
@@ -39,27 +43,29 @@ class CostTracker:
             usage = {}
 
             # LangChain response with response_metadata
-            if hasattr(llm_response, 'response_metadata'):
+            if hasattr(llm_response, "response_metadata"):
                 metadata = llm_response.response_metadata
-                token_usage = metadata.get('token_usage', {})
+                token_usage = metadata.get("token_usage", {})
                 usage = {
-                    "prompt_tokens": token_usage.get('prompt_tokens', 0),
-                    "completion_tokens": token_usage.get('completion_tokens', 0),
-                    "total_tokens": token_usage.get('total_tokens', 0),
+                    "prompt_tokens": token_usage.get("prompt_tokens", 0),
+                    "completion_tokens": token_usage.get("completion_tokens", 0),
+                    "total_tokens": token_usage.get("total_tokens", 0),
                 }
 
             # Usage info directly
-            elif hasattr(llm_response, 'usage_metadata'):
+            elif hasattr(llm_response, "usage_metadata"):
                 um = llm_response.usage_metadata
                 usage = {
-                    "prompt_tokens": getattr(um, 'input_tokens', 0),
-                    "completion_tokens": getattr(um, 'output_tokens', 0),
-                    "total_tokens": getattr(um, 'total_tokens', 0),
+                    "prompt_tokens": getattr(um, "input_tokens", 0),
+                    "completion_tokens": getattr(um, "output_tokens", 0),
+                    "total_tokens": getattr(um, "total_tokens", 0),
                 }
 
             # Ensure total is calculated
             if not usage.get("total_tokens"):
-                usage["total_tokens"] = usage.get("prompt_tokens", 0) + usage.get("completion_tokens", 0)
+                usage["total_tokens"] = usage.get("prompt_tokens", 0) + usage.get(
+                    "completion_tokens", 0
+                )
 
             return usage
 
@@ -67,7 +73,9 @@ class CostTracker:
             logger.error(f"Error extracting usage -> {str(e)}")
             return {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
 
-    def track_call(self, llm_response: Any, model_name: str = "llama-3.1-8b-instant") -> Dict[str, Any]:
+    def track_call(
+        self, llm_response: Any, model_name: str = "llama-3.1-8b-instant"
+    ) -> Dict[str, Any]:
         """Track a single LLM call and return cost info."""
         usage = self.extract_usage(llm_response)
         cost = self.estimate_cost(usage["prompt_tokens"], usage["completion_tokens"])

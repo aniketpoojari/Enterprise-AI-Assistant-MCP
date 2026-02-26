@@ -1,9 +1,9 @@
 """MCP Visualization tool backend - chart generation."""
 
-from typing import Dict, Any
+from typing import Any, Dict
 
-from services.visualization_service import VisualizationService
 from logger.logging import get_logger
+from services.visualization_service import VisualizationService
 
 logger = get_logger(__name__)
 
@@ -21,8 +21,14 @@ class VisualizationMCPTool:
             logger.error(error_msg)
             raise Exception(error_msg)
 
-    def execute(self, data: Dict[str, Any], chart_type: str = "bar",
-                title: str = "", x_label: str = "", y_label: str = "") -> Dict[str, Any]:
+    def execute(
+        self,
+        data: Dict[str, Any],
+        chart_type: str = "bar",
+        title: str = "",
+        x_label: str = "",
+        y_label: str = "",
+    ) -> Dict[str, Any]:
         """Generate a chart from data."""
         try:
             result = self.viz_service.generate_chart(
@@ -34,7 +40,12 @@ class VisualizationMCPTool:
             )
 
             if result.get("error"):
-                return {"success": False, "error": result["error"], "chart_base64": "", "chart_type": chart_type}
+                return {
+                    "success": False,
+                    "error": result["error"],
+                    "chart_base64": "",
+                    "chart_type": chart_type,
+                }
 
             return {
                 "success": True,
@@ -46,4 +57,9 @@ class VisualizationMCPTool:
         except Exception as e:
             error_msg = f"Error in VisualizationMCPTool.execute -> {str(e)}"
             logger.error(error_msg)
-            return {"success": False, "error": error_msg, "chart_base64": "", "chart_type": chart_type}
+            return {
+                "success": False,
+                "error": error_msg,
+                "chart_base64": "",
+                "chart_type": chart_type,
+            }

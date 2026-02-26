@@ -1,8 +1,9 @@
 """LangChain tool wrapper for SQL queries - used by LangGraph agent."""
 
 from langchain_core.tools import tool
-from mcp_server.sql_tool import SQLTool
+
 from logger.logging import get_logger
+from mcp_server.sql_tool import SQLTool
 
 logger = get_logger(__name__)
 

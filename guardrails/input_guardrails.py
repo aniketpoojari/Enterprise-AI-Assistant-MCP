@@ -1,11 +1,12 @@
 """Input guardrails - validate and sanitize user input before processing."""
 
 import re
-import yaml
 from pathlib import Path
-from typing import Dict, Any, List, Tuple
+from typing import Any, Dict, List, Tuple
 
-from guardrails.patterns import INJECTION_PATTERNS, PII_PATTERNS, OFF_TOPIC_PATTERNS
+import yaml
+
+from guardrails.patterns import INJECTION_PATTERNS, OFF_TOPIC_PATTERNS, PII_PATTERNS
 from logger.logging import get_logger
 
 logger = get_logger(__name__)
@@ -29,7 +30,7 @@ class InputGuardrails:
         """Load guardrails configuration."""
         path = Path(config_path)
         if path.exists():
-            with open(path, 'r') as f:
+            with open(path, "r") as f:
                 return yaml.safe_load(f) or {}
         return {}
 
@@ -117,7 +118,9 @@ class InputGuardrails:
     def check_query_validity(self, text: str) -> Dict[str, Any]:
         """Check if the query is relevant and within bounds."""
         # Check max length
-        max_len = self.input_config.get("query_validation", {}).get("max_query_length", 1000)
+        max_len = self.input_config.get("query_validation", {}).get(
+            "max_query_length", 1000
+        )
         if len(text) > max_len:
             return {
                 "guardrail_name": "query_validation",

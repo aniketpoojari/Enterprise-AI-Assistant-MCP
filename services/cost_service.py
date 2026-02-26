@@ -2,10 +2,10 @@
 
 import os
 import sqlite3
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
-from utils.config_loader import ConfigLoader
 from logger.logging import get_logger
+from utils.config_loader import ConfigLoader
 
 logger = get_logger(__name__)
 
@@ -18,7 +18,7 @@ class CostService:
             self.config = ConfigLoader()
             self.db_path = os.environ.get(
                 "DATABASE_PATH",
-                self.config.get("database.path", "database/ecommerce.db")
+                self.config.get("database.path", "database/ecommerce.db"),
             )
             logger.info("CostService initialized")
 
@@ -39,7 +39,8 @@ class CostService:
             conn = self._get_connection()
             cursor = conn.cursor()
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT
                     COUNT(*) as total_requests,
                     COALESCE(SUM(total_tokens), 0) as total_tokens,
@@ -51,7 +52,9 @@ class CostService:
                     MAX(created_at) as period_end
                 FROM cost_tracking
                 WHERE created_at >= datetime('now', ?)
-            """, (f"-{days} days",))
+            """,
+                (f"-{days} days",),
+            )
 
             row = cursor.fetchone()
             conn.close()
@@ -77,14 +80,17 @@ class CostService:
             conn = self._get_connection()
             cursor = conn.cursor()
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT request_id, query, model_name, prompt_tokens, completion_tokens,
                        total_tokens, estimated_cost_usd, latency_ms, tools_used,
                        guardrail_flags, success, created_at
                 FROM cost_tracking
                 ORDER BY created_at DESC
                 LIMIT ? OFFSET ?
-            """, (limit, offset))
+            """,
+                (limit, offset),
+            )
 
             rows = [dict(r) for r in cursor.fetchall()]
             conn.close()
@@ -100,7 +106,8 @@ class CostService:
             conn = self._get_connection()
             cursor = conn.cursor()
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT
                     DATE(created_at) as date,
                     COUNT(*) as requests,
@@ -111,7 +118,9 @@ class CostService:
                 WHERE created_at >= datetime('now', ?)
                 GROUP BY DATE(created_at)
                 ORDER BY date
-            """, (f"-{days} days",))
+            """,
+                (f"-{days} days",),
+            )
 
             rows = [dict(r) for r in cursor.fetchall()]
             conn.close()

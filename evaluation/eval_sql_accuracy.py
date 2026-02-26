@@ -3,10 +3,10 @@
 import json
 import time
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
-from services.nl_to_sql_service import NLToSQLService
 from logger.logging import get_logger
+from services.nl_to_sql_service import NLToSQLService
 
 logger = get_logger(__name__)
 
@@ -24,7 +24,7 @@ class SQLAccuracyEvaluator:
     def _load_test_queries(self) -> List[Dict]:
         """Load test queries from JSON file."""
         path = Path("evaluation/test_queries.json")
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             return json.load(f)
 
     def evaluate(self, max_queries: int = None) -> Dict[str, Any]:
@@ -61,38 +61,40 @@ class SQLAccuracyEvaluator:
 
                 # Check if SQL contains expected keywords
                 sql_upper = sql.upper()
-                missing_keywords = [kw for kw in expected_contains if kw.upper() not in sql_upper]
+                missing_keywords = [
+                    kw for kw in expected_contains if kw.upper() not in sql_upper
+                ]
 
-                success = (
-                    not error
-                    and sql
-                    and len(missing_keywords) == 0
-                )
+                success = not error and sql and len(missing_keywords) == 0
 
                 if success:
                     passed += 1
                 else:
                     failed += 1
 
-                results.append({
-                    "id": test["id"],
-                    "question": question,
-                    "difficulty": test.get("difficulty", ""),
-                    "generated_sql": sql,
-                    "error": error,
-                    "success": success,
-                    "missing_keywords": missing_keywords,
-                    "row_count": result.get("row_count", 0),
-                })
+                results.append(
+                    {
+                        "id": test["id"],
+                        "question": question,
+                        "difficulty": test.get("difficulty", ""),
+                        "generated_sql": sql,
+                        "error": error,
+                        "success": success,
+                        "missing_keywords": missing_keywords,
+                        "row_count": result.get("row_count", 0),
+                    }
+                )
 
             except Exception as e:
                 failed += 1
-                results.append({
-                    "id": test["id"],
-                    "question": question,
-                    "success": False,
-                    "error": str(e),
-                })
+                results.append(
+                    {
+                        "id": test["id"],
+                        "question": question,
+                        "success": False,
+                        "error": str(e),
+                    }
+                )
 
         total = len(queries)
         return {

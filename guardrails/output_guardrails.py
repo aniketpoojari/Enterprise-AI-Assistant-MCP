@@ -1,14 +1,15 @@
 """Output guardrails - validate and sanitize responses before returning to user."""
 
-import re
 import json
-import yaml
+import re
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
-from guardrails.patterns import SQL_INJECTION_PATTERNS, DATA_MASKING_PATTERNS
-from utils.sql_utils import validate_sql
+import yaml
+
+from guardrails.patterns import DATA_MASKING_PATTERNS, SQL_INJECTION_PATTERNS
 from logger.logging import get_logger
+from utils.sql_utils import validate_sql
 
 logger = get_logger(__name__)
 
@@ -37,12 +38,17 @@ class OutputGuardrails:
         """Load guardrails configuration."""
         path = Path(config_path)
         if path.exists():
-            with open(path, 'r') as f:
+            with open(path, "r") as f:
                 return yaml.safe_load(f) or {}
         return {}
 
-    def check_all(self, sql: str = "", rows: List[Dict] = None,
-                  columns: List[str] = None, response_text: str = "") -> List[Dict[str, Any]]:
+    def check_all(
+        self,
+        sql: str = "",
+        rows: List[Dict] = None,
+        columns: List[str] = None,
+        response_text: str = "",
+    ) -> List[Dict[str, Any]]:
         """Run all output guardrails.
 
         Returns:
@@ -66,9 +72,13 @@ class OutputGuardrails:
 
     def check_sql_safety(self, sql: str) -> Dict[str, Any]:
         """Validate generated SQL against safety rules."""
-        allowed_tables = self.output_config.get("sql_validation", {}).get("allowed_tables", [])
+        allowed_tables = self.output_config.get("sql_validation", {}).get(
+            "allowed_tables", []
+        )
 
-        is_valid, error_msg = validate_sql(sql, allowed_tables if allowed_tables else None)
+        is_valid, error_msg = validate_sql(
+            sql, allowed_tables if allowed_tables else None
+        )
 
         if not is_valid:
             logger.warning(f"SQL safety check failed: {error_msg}")
@@ -107,7 +117,9 @@ class OutputGuardrails:
 
     def mask_sensitive_data(self, rows: List[Dict], columns: List[str]) -> List[Dict]:
         """Mask sensitive columns in query results."""
-        if not rows or not self.output_config.get("data_masking", {}).get("enabled", True):
+        if not rows or not self.output_config.get("data_masking", {}).get(
+            "enabled", True
+        ):
             return rows
 
         cols_to_mask = self.sensitive_columns.intersection(set(columns))
@@ -121,7 +133,9 @@ class OutputGuardrails:
                 if col in masked_row and masked_row[col]:
                     value = str(masked_row[col])
                     if len(value) > self.visible_chars:
-                        masked_row[col] = value[:self.visible_chars] + self.masking_char * (len(value) - self.visible_chars)
+                        masked_row[col] = value[
+                            : self.visible_chars
+                        ] + self.masking_char * (len(value) - self.visible_chars)
                     else:
                         masked_row[col] = self.masking_char * len(value)
             masked_rows.append(masked_row)

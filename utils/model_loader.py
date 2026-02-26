@@ -1,10 +1,11 @@
 """Model loader for the Enterprise AI Assistant."""
 
 from typing import Any, Dict
+
 from langchain_groq import ChatGroq
 
-from utils.config_loader import ConfigLoader
 from logger.logging import get_logger
+from utils.config_loader import ConfigLoader
 
 logger = get_logger(__name__)
 
@@ -62,7 +63,7 @@ class ModelLoader:
                 groq_api_key=api_key,
                 model_name=model_name,
                 temperature=temperature,
-                max_tokens=max_tokens
+                max_tokens=max_tokens,
             )
 
         except Exception as e:
@@ -78,9 +79,9 @@ class ModelLoader:
             return {
                 "provider": self.model_provider,
                 "loaded": True,
-                "model_name": getattr(self.llm, 'model_name', 'unknown'),
-                "temperature": getattr(self.llm, 'temperature', 'unknown'),
-                "max_tokens": getattr(self.llm, 'max_tokens', 'unknown')
+                "model_name": getattr(self.llm, "model_name", "unknown"),
+                "temperature": getattr(self.llm, "temperature", "unknown"),
+                "max_tokens": getattr(self.llm, "max_tokens", "unknown"),
             }
 
         except Exception as e:

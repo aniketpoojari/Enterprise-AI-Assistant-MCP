@@ -6,10 +6,10 @@ Uses FastMCP for a clean, decorator-based API.
 
 from mcp.server.fastmcp import FastMCP
 
+from logger.logging import get_logger
+from mcp_server.report_tool import ReportMCPTool
 from mcp_server.sql_tool import SQLTool
 from mcp_server.visualization_tool import VisualizationMCPTool
-from mcp_server.report_tool import ReportMCPTool
-from logger.logging import get_logger
 
 logger = get_logger(__name__)
 
@@ -48,6 +48,7 @@ def _get_report_tool():
 
 # --- MCP Tools ---
 
+
 @mcp.tool()
 def query_database(natural_language_query: str, max_rows: int = 100) -> dict:
     """Convert a natural language question about the e-commerce database into SQL,
@@ -69,8 +70,13 @@ def query_database(natural_language_query: str, max_rows: int = 100) -> dict:
 
 
 @mcp.tool()
-def generate_chart(natural_language_query: str, chart_type: str = "bar",
-                   title: str = "", x_label: str = "", y_label: str = "") -> dict:
+def generate_chart(
+    natural_language_query: str,
+    chart_type: str = "bar",
+    title: str = "",
+    x_label: str = "",
+    y_label: str = "",
+) -> dict:
     """Query the database and generate a chart from the results in one step.
 
     Args:
@@ -89,7 +95,10 @@ def generate_chart(natural_language_query: str, chart_type: str = "bar",
     if query_result.get("error"):
         return {"success": False, "error": query_result["error"]}
 
-    data = {"columns": query_result.get("columns", []), "rows": query_result.get("rows", [])}
+    data = {
+        "columns": query_result.get("columns", []),
+        "rows": query_result.get("rows", []),
+    }
     viz_tool = _get_viz_tool()
     chart_result = viz_tool.execute(data, chart_type, title, x_label, y_label)
     chart_result["sql"] = query_result.get("sql", "")
@@ -98,8 +107,7 @@ def generate_chart(natural_language_query: str, chart_type: str = "bar",
 
 
 @mcp.tool()
-def generate_report(natural_language_query: str,
-                    report_type: str = "summary") -> dict:
+def generate_report(natural_language_query: str, report_type: str = "summary") -> dict:
     """Query the database and generate a markdown report with business insights in one step.
 
     Args:
@@ -117,13 +125,16 @@ def generate_report(natural_language_query: str,
         return {"success": False, "error": query_result["error"]}
 
     report_tool = _get_report_tool()
-    report_result = report_tool.execute(natural_language_query, query_result, report_type)
+    report_result = report_tool.execute(
+        natural_language_query, query_result, report_type
+    )
     report_result["sql"] = query_result.get("sql", "")
     report_result["row_count"] = query_result.get("row_count", 0)
     return report_result
 
 
 # --- MCP Resources ---
+
 
 @mcp.resource("schema://ecommerce")
 def get_database_schema() -> str:

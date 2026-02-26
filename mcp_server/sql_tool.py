@@ -1,11 +1,11 @@
 """MCP SQL tool backend - NL-to-SQL generation and execution."""
 
 import json
-from typing import Dict, Any
+from typing import Any, Dict
 
-from services.nl_to_sql_service import NLToSQLService
-from models.database import DatabaseManager
 from logger.logging import get_logger
+from models.database import DatabaseManager
+from services.nl_to_sql_service import NLToSQLService
 
 logger = get_logger(__name__)
 
@@ -53,7 +53,14 @@ class SQLTool:
         except Exception as e:
             error_msg = f"Error in SQLTool.execute -> {str(e)}"
             logger.error(error_msg)
-            return {"success": False, "error": error_msg, "sql": "", "columns": [], "rows": [], "row_count": 0}
+            return {
+                "success": False,
+                "error": error_msg,
+                "sql": "",
+                "columns": [],
+                "rows": [],
+                "row_count": 0,
+            }
 
     def get_schema(self) -> str:
         """Return the database schema summary."""

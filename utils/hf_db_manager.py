@@ -53,6 +53,7 @@ def seed_and_upload(repo_id: str, token: str, db_path: str = DEFAULT_DB_PATH):
 
     # Seed the database
     from database.seed_data import seed_database
+
     print(f"Seeding database at {db_path}...")
     seed_database(db_path)
 

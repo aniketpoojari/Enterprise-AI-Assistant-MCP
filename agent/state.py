@@ -1,11 +1,13 @@
 """Agent state definition for LangGraph workflow."""
 
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 from langgraph.graph import MessagesState
 
 
 class AgentState(MessagesState):
     """Custom state for the Enterprise AI Assistant agent."""
+
     intent: str
     sql_result: Dict[str, Any]
     chart_result: Dict[str, Any]

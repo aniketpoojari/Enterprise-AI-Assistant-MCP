@@ -1,26 +1,34 @@
 """FastAPI backend for the Enterprise AI Assistant."""
 
-from fastapi import FastAPI, HTTPException, Depends
-from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
-from typing import Dict, Any
-from concurrent.futures import ThreadPoolExecutor
 import asyncio
-import uuid
-import time
 import json
+import time
+import uuid
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import asynccontextmanager
+from typing import Any, Dict
+
+from fastapi import Depends, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from agent.agent_workflow import EnterpriseAssistantWorkflow
-from services.guardrail_service import GuardrailService
-from services.cost_service import CostService
+from logger.logging import get_logger, setup_logging
 from models.database import DatabaseManager
 from models.pydantic_models import (
-    QueryRequest, QueryResponse, GuardrailTestRequest,
-    CostSummary, HealthResponse, CostInfo, SQLResult,
-    GuardrailResult, GuardrailStatus, QueryIntent
+    CostInfo,
+    CostSummary,
+    GuardrailResult,
+    GuardrailStatus,
+    GuardrailTestRequest,
+    HealthResponse,
+    QueryIntent,
+    QueryRequest,
+    QueryResponse,
+    SQLResult,
 )
+from services.cost_service import CostService
+from services.guardrail_service import GuardrailService
 from utils.config_loader import ConfigLoader
-from logger.logging import setup_logging, get_logger
 
 # Initialize logging
 config = ConfigLoader()
@@ -90,6 +98,7 @@ def get_workflow():
 
 # --- Core Endpoints ---
 
+
 @app.post("/query", response_model=QueryResponse)
 async def query(request: QueryRequest, workflow=Depends(get_workflow)):
     """Main endpoint - process a natural language query."""
@@ -99,8 +108,7 @@ async def query(request: QueryRequest, workflow=Depends(get_workflow)):
     try:
         loop = asyncio.get_event_loop()
         result = await loop.run_in_executor(
-            thread_pool,
-            lambda: workflow.invoke(request.query, request.conversation_id)
+            thread_pool, lambda: workflow.invoke(request.query, request.conversation_id)
         )
 
         elapsed_ms = round((time.time() - start_time) * 1000, 2)
@@ -118,17 +126,21 @@ async def query(request: QueryRequest, workflow=Depends(get_workflow)):
         # Build guardrail results
         guardrail_checks = []
         for gr in result.get("guardrail_results", []):
-            guardrail_checks.append(GuardrailResult(
-                status=gr.get("status", "passed"),
-                guardrail_name=gr.get("guardrail_name", ""),
-                message=gr.get("message", ""),
-                confidence=gr.get("confidence"),
-            ))
+            guardrail_checks.append(
+                GuardrailResult(
+                    status=gr.get("status", "passed"),
+                    guardrail_name=gr.get("guardrail_name", ""),
+                    message=gr.get("message", ""),
+                    confidence=gr.get("confidence"),
+                )
+            )
 
         # Record cost
         if db_manager:
             tools_str = json.dumps(result.get("tools_used", []))
-            flags_str = json.dumps([g.guardrail_name for g in guardrail_checks if g.status != "passed"])
+            flags_str = json.dumps(
+                [g.guardrail_name for g in guardrail_checks if g.status != "passed"]
+            )
             db_manager.record_cost(
                 request_id=request_id,
                 query=request.query,
@@ -160,6 +172,7 @@ async def query(request: QueryRequest, workflow=Depends(get_workflow)):
 
 # --- Guardrail Endpoints ---
 
+
 @app.post("/guardrails/test")
 async def test_guardrails(request: GuardrailTestRequest):
     """Test input against guardrails without executing."""
@@ -179,6 +192,7 @@ async def guardrail_stats():
 
 
 # --- Cost Endpoints ---
+
 
 @app.get("/cost/summary")
 async def get_cost_summary(days: int = 30):
@@ -205,6 +219,7 @@ async def get_daily_costs(days: int = 30):
 
 
 # --- Database Endpoints ---
+
 
 @app.get("/database/schema")
 async def get_schema():
@@ -233,6 +248,7 @@ async def get_sample(table_name: str, limit: int = 5):
 
 # --- MCP Info ---
 
+
 @app.get("/mcp/tools")
 async def list_mcp_tools():
     """List available MCP tools."""
@@ -241,23 +257,31 @@ async def list_mcp_tools():
             {
                 "name": "query_database",
                 "description": "Convert natural language to SQL and query the e-commerce database",
-                "parameters": {"natural_language_query": "str", "max_rows": "int (default 100)"}
+                "parameters": {
+                    "natural_language_query": "str",
+                    "max_rows": "int (default 100)",
+                },
             },
             {
                 "name": "generate_chart",
                 "description": "Generate charts from query results",
-                "parameters": {"data": "dict", "chart_type": "str", "title": "str"}
+                "parameters": {"data": "dict", "chart_type": "str", "title": "str"},
             },
             {
                 "name": "generate_report",
                 "description": "Generate markdown business reports from query results",
-                "parameters": {"query": "str", "sql_result": "dict", "report_type": "str"}
-            }
+                "parameters": {
+                    "query": "str",
+                    "sql_result": "dict",
+                    "report_type": "str",
+                },
+            },
         ]
     }
 
 
 # --- Health ---
+
 
 @app.get("/", response_model=HealthResponse)
 @app.get("/health", response_model=HealthResponse)
@@ -276,4 +300,5 @@ async def health():
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -1,11 +1,11 @@
 """Agent decision quality evaluation - tests routing and tool selection."""
 
 import time
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
-from utils.model_loader import ModelLoader
-from prompt_library.prompts import ROUTER_PROMPT
 from logger.logging import get_logger
+from prompt_library.prompts import ROUTER_PROMPT
+from utils.model_loader import ModelLoader
 
 logger = get_logger(__name__)
 
@@ -14,21 +14,39 @@ API_CALL_DELAY = 2.5
 
 # Test cases for routing accuracy
 ROUTING_TESTS = [
-    {"query": "What are the top 10 products by revenue?", "expected_intent": "sql_query"},
+    {
+        "query": "What are the top 10 products by revenue?",
+        "expected_intent": "sql_query",
+    },
     {"query": "Show me a chart of monthly sales", "expected_intent": "visualization"},
     {"query": "Generate a report on customer segments", "expected_intent": "report"},
     {"query": "Hello, what can you do?", "expected_intent": "general"},
     {"query": "How many orders were placed last week?", "expected_intent": "sql_query"},
     {"query": "Plot revenue by category", "expected_intent": "visualization"},
-    {"query": "Write an executive summary of Q4 performance", "expected_intent": "report"},
+    {
+        "query": "Write an executive summary of Q4 performance",
+        "expected_intent": "report",
+    },
     {"query": "Hi there!", "expected_intent": "general"},
-    {"query": "Which customers have the highest lifetime value?", "expected_intent": "sql_query"},
-    {"query": "Visualize the order status distribution", "expected_intent": "visualization"},
+    {
+        "query": "Which customers have the highest lifetime value?",
+        "expected_intent": "sql_query",
+    },
+    {
+        "query": "Visualize the order status distribution",
+        "expected_intent": "visualization",
+    },
     {"query": "What is the average order value?", "expected_intent": "sql_query"},
-    {"query": "Give me an analysis of product performance", "expected_intent": "report"},
+    {
+        "query": "Give me an analysis of product performance",
+        "expected_intent": "report",
+    },
     {"query": "What can you help me with?", "expected_intent": "general"},
     {"query": "Show products with rating above 4", "expected_intent": "sql_query"},
-    {"query": "Create a bar chart of revenue by payment method", "expected_intent": "visualization"},
+    {
+        "query": "Create a bar chart of revenue by payment method",
+        "expected_intent": "visualization",
+    },
 ]
 
 
@@ -63,21 +81,25 @@ class AgentDecisionEvaluator:
                 if is_correct:
                     correct += 1
 
-                details.append({
-                    "query": test["query"],
-                    "expected": expected,
-                    "actual": actual_intent,
-                    "correct": is_correct,
-                })
+                details.append(
+                    {
+                        "query": test["query"],
+                        "expected": expected,
+                        "actual": actual_intent,
+                        "correct": is_correct,
+                    }
+                )
 
             except Exception as e:
-                details.append({
-                    "query": test["query"],
-                    "expected": test["expected_intent"],
-                    "actual": "error",
-                    "correct": False,
-                    "error": str(e),
-                })
+                details.append(
+                    {
+                        "query": test["query"],
+                        "expected": test["expected_intent"],
+                        "actual": "error",
+                        "correct": False,
+                        "error": str(e),
+                    }
+                )
 
         return {
             "routing_accuracy": correct / total if total > 0 else 0,

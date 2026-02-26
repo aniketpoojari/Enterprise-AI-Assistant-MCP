@@ -1,10 +1,11 @@
 """Streamlit frontend for the Enterprise AI Assistant."""
 
-import streamlit as st
-import requests
-import json
 import base64
+import json
 from datetime import datetime
+
+import requests
+import streamlit as st
 
 # --- Page Config ---
 st.set_page_config(
@@ -23,6 +24,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 if "conversation_id" not in st.session_state:
     import uuid
+
     st.session_state.conversation_id = str(uuid.uuid4())
 
 
@@ -40,7 +42,9 @@ def query_api(question: str) -> dict:
         response.raise_for_status()
         return response.json()
     except requests.exceptions.ConnectionError:
-        return {"error": "Cannot connect to backend. Make sure FastAPI is running on port 8000."}
+        return {
+            "error": "Cannot connect to backend. Make sure FastAPI is running on port 8000."
+        }
     except Exception as e:
         return {"error": str(e)}
 
@@ -113,6 +117,7 @@ with st.sidebar:
     if st.button("Clear Chat", use_container_width=True):
         st.session_state.messages = []
         import uuid
+
         st.session_state.conversation_id = str(uuid.uuid4())
         st.rerun()
 
@@ -149,8 +154,14 @@ for msg in st.session_state.messages:
                     )
                 if meta.get("guardrails"):
                     for g in meta["guardrails"]:
-                        status_icon = "✅" if g["status"] == "passed" else "⚠️" if g["status"] == "warning" else "🚫"
-                        st.caption(f"{status_icon} {g['guardrail_name']}: {g['message']}")
+                        status_icon = (
+                            "✅"
+                            if g["status"] == "passed"
+                            else "⚠️" if g["status"] == "warning" else "🚫"
+                        )
+                        st.caption(
+                            f"{status_icon} {g['guardrail_name']}: {g['message']}"
+                        )
 
 # Handle sample query button
 if "sample_query" in st.session_state:
@@ -166,19 +177,29 @@ if "sample_query" in st.session_state:
 
         if result.get("error"):
             st.error(result["error"])
-            st.session_state.messages.append({"role": "assistant", "content": f"Error: {result['error']}"})
+            st.session_state.messages.append(
+                {"role": "assistant", "content": f"Error: {result['error']}"}
+            )
         else:
             response_text = result.get("response", "")
             st.markdown(response_text)
 
             metadata = {
-                "sql": result.get("sql_result", {}).get("sql", "") if result.get("sql_result") else "",
+                "sql": (
+                    result.get("sql_result", {}).get("sql", "")
+                    if result.get("sql_result")
+                    else ""
+                ),
                 "cost": result.get("cost", {}),
                 "execution_time_ms": result.get("execution_time_ms", 0),
                 "guardrails": result.get("guardrail_checks", []),
             }
 
-            msg_data = {"role": "assistant", "content": response_text, "metadata": metadata}
+            msg_data = {
+                "role": "assistant",
+                "content": response_text,
+                "metadata": metadata,
+            }
 
             # Display chart if present
             chart = result.get("chart")
@@ -207,19 +228,29 @@ if prompt := st.chat_input("Ask about your business data..."):
 
         if result.get("error"):
             st.error(result["error"])
-            st.session_state.messages.append({"role": "assistant", "content": f"Error: {result['error']}"})
+            st.session_state.messages.append(
+                {"role": "assistant", "content": f"Error: {result['error']}"}
+            )
         else:
             response_text = result.get("response", "")
             st.markdown(response_text)
 
             metadata = {
-                "sql": result.get("sql_result", {}).get("sql", "") if result.get("sql_result") else "",
+                "sql": (
+                    result.get("sql_result", {}).get("sql", "")
+                    if result.get("sql_result")
+                    else ""
+                ),
                 "cost": result.get("cost", {}),
                 "execution_time_ms": result.get("execution_time_ms", 0),
                 "guardrails": result.get("guardrail_checks", []),
             }
 
-            msg_data = {"role": "assistant", "content": response_text, "metadata": metadata}
+            msg_data = {
+                "role": "assistant",
+                "content": response_text,
+                "metadata": metadata,
+            }
 
             chart = result.get("chart")
             if chart and chart.get("chart_base64"):

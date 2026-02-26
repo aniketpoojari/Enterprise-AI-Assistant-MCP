@@ -11,6 +11,7 @@ class TestHealthEndpoints:
         """Health endpoint should return even without full initialization."""
         # Import app without lifespan to test basic routing
         from main import app
+
         # Note: Full integration tests require GROQ_API_KEY
         # These tests validate endpoint structure only
         assert app.title == "Enterprise AI Assistant"
@@ -18,6 +19,7 @@ class TestHealthEndpoints:
     def test_mcp_tools_list_structure(self):
         """MCP tools endpoint should list 3 tools."""
         from main import app
+
         client = TestClient(app, raise_server_exceptions=False)
         response = client.get("/mcp/tools")
         if response.status_code == 200:

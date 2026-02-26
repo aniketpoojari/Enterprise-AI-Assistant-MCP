@@ -1,12 +1,12 @@
 """Report generation service for the Enterprise AI Assistant."""
 
 import json
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
-from utils.model_loader import ModelLoader
-from utils.cost_tracker import CostTracker
-from prompt_library.prompts import REPORT_SYSTEM_PROMPT, REPORT_USER_PROMPT
 from logger.logging import get_logger
+from prompt_library.prompts import REPORT_SYSTEM_PROMPT, REPORT_USER_PROMPT
+from utils.cost_tracker import CostTracker
+from utils.model_loader import ModelLoader
 
 logger = get_logger(__name__)
 
@@ -26,8 +26,13 @@ class ReportService:
             logger.error(error_msg)
             raise Exception(error_msg)
 
-    def generate(self, question: str, sql: str, data: Dict[str, Any],
-                 report_type: str = "summary") -> Dict[str, Any]:
+    def generate(
+        self,
+        question: str,
+        sql: str,
+        data: Dict[str, Any],
+        report_type: str = "summary",
+    ) -> Dict[str, Any]:
         """Generate a markdown report from query results.
 
         Args:
@@ -48,16 +53,19 @@ class ReportService:
             preview_rows = rows[:20]
             data_preview = self._format_data_preview(columns, preview_rows)
 
-            from langchain_core.messages import SystemMessage, HumanMessage
+            from langchain_core.messages import HumanMessage, SystemMessage
+
             messages = [
                 SystemMessage(content=REPORT_SYSTEM_PROMPT),
-                HumanMessage(content=REPORT_USER_PROMPT.format(
-                    report_type=report_type,
-                    question=question,
-                    sql=sql,
-                    row_count=row_count,
-                    data_preview=data_preview,
-                )),
+                HumanMessage(
+                    content=REPORT_USER_PROMPT.format(
+                        report_type=report_type,
+                        question=question,
+                        sql=sql,
+                        row_count=row_count,
+                        data_preview=data_preview,
+                    )
+                ),
             ]
 
             response = self.llm.invoke(messages)
@@ -78,7 +86,12 @@ class ReportService:
         except Exception as e:
             error_msg = f"Error generating report -> {str(e)}"
             logger.error(error_msg)
-            return {"markdown": f"Error generating report: {error_msg}", "key_findings": [], "data_quality_notes": [], "cost": {}}
+            return {
+                "markdown": f"Error generating report: {error_msg}",
+                "key_findings": [],
+                "data_quality_notes": [],
+                "cost": {},
+            }
 
     def _format_data_preview(self, columns: List[str], rows: List[Dict]) -> str:
         """Format query results as a readable table for the LLM."""
@@ -106,7 +119,11 @@ class ReportService:
 
         for line in markdown.split("\n"):
             stripped = line.strip()
-            if "finding" in stripped.lower() or "insight" in stripped.lower() or "key" in stripped.lower():
+            if (
+                "finding" in stripped.lower()
+                or "insight" in stripped.lower()
+                or "key" in stripped.lower()
+            ):
                 in_findings = True
                 continue
             if in_findings and stripped.startswith(("-", "*", "•")):
@@ -123,20 +140,26 @@ class ReportService:
 
         return findings[:5]
 
-    def _extract_quality_notes(self, markdown: str, rows: List, columns: List) -> List[str]:
+    def _extract_quality_notes(
+        self, markdown: str, rows: List, columns: List
+    ) -> List[str]:
         """Generate data quality notes."""
         notes = []
 
         if not rows:
             notes.append("No data returned for this query.")
         elif len(rows) >= 100:
-            notes.append("Results were truncated to 100 rows. The full dataset may contain more records.")
+            notes.append(
+                "Results were truncated to 100 rows. The full dataset may contain more records."
+            )
 
         # Check for NULL values
         if rows and isinstance(rows[0], dict):
             for col in columns:
                 null_count = sum(1 for row in rows if row.get(col) is None)
                 if null_count > 0:
-                    notes.append(f"Column '{col}' has {null_count} NULL values ({null_count}/{len(rows)} rows).")
+                    notes.append(
+                        f"Column '{col}' has {null_count} NULL values ({null_count}/{len(rows)} rows)."
+                    )
 
         return notes
