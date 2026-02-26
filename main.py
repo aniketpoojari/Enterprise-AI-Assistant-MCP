@@ -107,8 +107,12 @@ async def query(request: QueryRequest, workflow=Depends(get_workflow)):
 
     try:
         loop = asyncio.get_event_loop()
-        result = await loop.run_in_executor(
-            thread_pool, lambda: workflow.invoke(request.query, request.conversation_id)
+        result = await asyncio.wait_for(
+            loop.run_in_executor(
+                thread_pool,
+                lambda: workflow.invoke(request.query, request.conversation_id),
+            ),
+            timeout=90,
         )
 
         elapsed_ms = round((time.time() - start_time) * 1000, 2)
@@ -165,6 +169,13 @@ async def query(request: QueryRequest, workflow=Depends(get_workflow)):
             execution_time_ms=elapsed_ms,
         )
 
+    except asyncio.TimeoutError:
+        elapsed_ms = round((time.time() - start_time) * 1000, 2)
+        logger.error(f"Query timed out after {elapsed_ms}ms: {request.query[:100]}")
+        raise HTTPException(
+            status_code=504,
+            detail="Query processing timed out. Try a simpler question or try again later.",
+        )
     except Exception as e:
         logger.error(f"Error processing query -> {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))

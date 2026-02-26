@@ -37,13 +37,17 @@ def query_api(question: str) -> dict:
                 "query": question,
                 "conversation_id": st.session_state.conversation_id,
             },
-            timeout=60,
+            timeout=120,
         )
         response.raise_for_status()
         return response.json()
     except requests.exceptions.ConnectionError:
         return {
             "error": "Cannot connect to backend. Make sure FastAPI is running on port 8000."
+        }
+    except requests.exceptions.ReadTimeout:
+        return {
+            "error": "Request timed out. The query may be too complex. Please try a simpler question or try again."
         }
     except Exception as e:
         return {"error": str(e)}

@@ -94,6 +94,7 @@ class EnterpriseAssistantWorkflow:
             graph.add_edge("general_response", END)
 
             self.graph = graph.compile()
+            self.graph.recursion_limit = 15
             logger.info("Agent graph built successfully")
 
         except Exception as e:
