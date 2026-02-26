@@ -94,7 +94,7 @@ class ReportService:
             }
 
     def _format_data_preview(self, columns: List[str], rows: List[Dict]) -> str:
-        """Format query results as a readable table for the LLM."""
+        """Format query results as a readable table for the LLM with truncation."""
         if not rows:
             return "No data returned."
 
@@ -102,13 +102,19 @@ class ReportService:
         lines = [" | ".join(columns)]
         lines.append(" | ".join(["---"] * len(columns)))
 
-        # Rows
+        # Rows (limit each value to keep prompt manageable)
         for row in rows:
             if isinstance(row, dict):
-                values = [str(row.get(col, "")) for col in columns]
+                # Truncate each value to 200 chars to avoid huge prompts if cells have long text
+                values = [str(row.get(col, ""))[:200] + ("..." if len(str(row.get(col, ""))) > 200 else "") for col in columns]
             else:
-                values = [str(v) for v in row]
+                values = [str(v)[:200] + ("..." if len(str(v)) > 200 else "") for v in row]
             lines.append(" | ".join(values))
+            
+            # If total length is already too large, stop adding rows
+            if sum(len(line) for line in lines) > 8000:
+                lines.append("... [Additional rows omitted for brevity]")
+                break
 
         return "\n".join(lines)
 

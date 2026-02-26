@@ -159,7 +159,10 @@ class EnterpriseAssistantWorkflow:
         """Main agent node - decides which tools to use."""
         try:
             system_msg = SystemMessage(content=AGENT_SYSTEM_PROMPT)
-            messages = [system_msg] + state["messages"]
+            
+            # Clean messages to remove large data (like base64 charts) before sending to LLM
+            cleaned_history = self._clean_messages(state["messages"])
+            messages = [system_msg] + cleaned_history
 
             response = self.llm_with_tools.invoke(messages)
             cost = self.cost_tracker.track_call(response)
@@ -181,6 +184,45 @@ class EnterpriseAssistantWorkflow:
                     )
                 ],
             }
+
+    def _clean_messages(self, messages: list) -> list:
+        """Remove or truncate large data from messages to save tokens."""
+        import json
+        from langchain_core.messages import ToolMessage
+
+        cleaned = []
+        for msg in messages:
+            if isinstance(msg, ToolMessage):
+                try:
+                    content_data = json.loads(msg.content)
+                    if isinstance(content_data, dict):
+                        changed = False
+                        # Specifically target chart_base64 and large rows
+                        if "chart_base64" in content_data and len(str(content_data["chart_base64"])) > 1000:
+                            content_data["chart_base64"] = "[BASE64_IMAGE_DATA_OMITTED]"
+                            changed = True
+                        
+                        # Truncate very large row sets for the LLM's context
+                        if "rows" in content_data and isinstance(content_data["rows"], list):
+                            rows_str = json.dumps(content_data["rows"])
+                            if len(rows_str) > 4000:
+                                # Keep first 5 rows as a sample for the LLM
+                                content_data["rows"] = content_data["rows"][:5]
+                                content_data["data_truncated_for_llm"] = True
+                                changed = True
+                        
+                        if changed:
+                            # Create a new ToolMessage with cleaned content
+                            # We keep the original tool_call_id so LangChain can still match it
+                            cleaned.append(ToolMessage(
+                                content=json.dumps(content_data),
+                                tool_call_id=msg.tool_call_id
+                            ))
+                            continue
+                except (json.JSONDecodeError, TypeError, KeyError):
+                    pass
+            cleaned.append(msg)
+        return cleaned
 
     def output_guardrail_node(self, state: AgentState) -> Dict[str, Any]:
         """Run output guardrails on tool results."""

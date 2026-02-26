@@ -204,7 +204,18 @@ class DatabaseManager:
                 # Sample data
                 sample = self.get_sample_rows(table, limit=3)
                 if sample.get("rows"):
-                    summary_parts.append(f"  Sample: {sample['rows'][:2]}")
+                    sample_rows = sample["rows"][:2]
+                    # Clean sample rows to truncate long strings
+                    cleaned_samples = []
+                    for row in sample_rows:
+                        cleaned_row = {}
+                        for k, v in row.items():
+                            if isinstance(v, str) and len(v) > 100:
+                                cleaned_row[k] = v[:100] + "..."
+                            else:
+                                cleaned_row[k] = v
+                        cleaned_samples.append(cleaned_row)
+                    summary_parts.append(f"  Sample: {cleaned_samples}")
 
                 summary_parts.append("")
 
