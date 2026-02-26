@@ -1,0 +1,142 @@
+[
+  {
+    "id": 1,
+    "question": "How many customers do we have?",
+    "expected_sql_contains": ["SELECT", "COUNT", "customers"],
+    "difficulty": "easy",
+    "category": "aggregation"
+  },
+  {
+    "id": 2,
+    "question": "What are the top 10 products by revenue?",
+    "expected_sql_contains": ["SELECT", "JOIN", "order_items", "products", "ORDER BY", "LIMIT"],
+    "difficulty": "medium",
+    "category": "ranking"
+  },
+  {
+    "id": 3,
+    "question": "Show me monthly revenue for the last 6 months",
+    "expected_sql_contains": ["SELECT", "SUM", "orders", "GROUP BY"],
+    "difficulty": "medium",
+    "category": "time_series"
+  },
+  {
+    "id": 4,
+    "question": "What is the average order value by customer segment?",
+    "expected_sql_contains": ["SELECT", "AVG", "customers", "orders", "segment", "GROUP BY"],
+    "difficulty": "medium",
+    "category": "aggregation"
+  },
+  {
+    "id": 5,
+    "question": "Which product categories have the highest average rating?",
+    "expected_sql_contains": ["SELECT", "AVG", "rating", "products", "category", "GROUP BY", "ORDER BY"],
+    "difficulty": "easy",
+    "category": "ranking"
+  },
+  {
+    "id": 6,
+    "question": "How many orders were cancelled vs delivered?",
+    "expected_sql_contains": ["SELECT", "COUNT", "orders", "status", "GROUP BY"],
+    "difficulty": "easy",
+    "category": "aggregation"
+  },
+  {
+    "id": 7,
+    "question": "What is the total revenue by payment method?",
+    "expected_sql_contains": ["SELECT", "SUM", "orders", "payment_method", "GROUP BY"],
+    "difficulty": "easy",
+    "category": "aggregation"
+  },
+  {
+    "id": 8,
+    "question": "Show me the top 5 customers by lifetime value",
+    "expected_sql_contains": ["SELECT", "customers", "lifetime_value", "ORDER BY", "LIMIT"],
+    "difficulty": "easy",
+    "category": "ranking"
+  },
+  {
+    "id": 9,
+    "question": "What products are out of stock?",
+    "expected_sql_contains": ["SELECT", "products", "stock_quantity"],
+    "difficulty": "easy",
+    "category": "filtering"
+  },
+  {
+    "id": 10,
+    "question": "What is the cancellation rate by month?",
+    "expected_sql_contains": ["SELECT", "orders", "status", "GROUP BY"],
+    "difficulty": "hard",
+    "category": "time_series"
+  },
+  {
+    "id": 11,
+    "question": "Which brands have the most reviews?",
+    "expected_sql_contains": ["SELECT", "COUNT", "reviews", "products", "brand", "GROUP BY"],
+    "difficulty": "medium",
+    "category": "join"
+  },
+  {
+    "id": 12,
+    "question": "Show the revenue distribution by category",
+    "expected_sql_contains": ["SELECT", "SUM", "products", "order_items", "category", "GROUP BY"],
+    "difficulty": "medium",
+    "category": "aggregation"
+  },
+  {
+    "id": 13,
+    "question": "What is the average discount given per order?",
+    "expected_sql_contains": ["SELECT", "AVG", "discount"],
+    "difficulty": "easy",
+    "category": "aggregation"
+  },
+  {
+    "id": 14,
+    "question": "How many Enterprise customers placed orders last month?",
+    "expected_sql_contains": ["SELECT", "COUNT", "customers", "orders", "Enterprise"],
+    "difficulty": "hard",
+    "category": "filtering"
+  },
+  {
+    "id": 15,
+    "question": "What are the most helpful reviews?",
+    "expected_sql_contains": ["SELECT", "reviews", "helpful_votes", "ORDER BY"],
+    "difficulty": "easy",
+    "category": "ranking"
+  },
+  {
+    "id": 16,
+    "question": "Show me inventory changes for the last week",
+    "expected_sql_contains": ["SELECT", "inventory_log"],
+    "difficulty": "medium",
+    "category": "time_series"
+  },
+  {
+    "id": 17,
+    "question": "What is the average profit margin by category?",
+    "expected_sql_contains": ["SELECT", "products", "price", "cost", "category", "GROUP BY"],
+    "difficulty": "hard",
+    "category": "calculation"
+  },
+  {
+    "id": 18,
+    "question": "Which cities have the most customers?",
+    "expected_sql_contains": ["SELECT", "COUNT", "customers", "city", "GROUP BY", "ORDER BY"],
+    "difficulty": "easy",
+    "category": "ranking"
+  },
+  {
+    "id": 19,
+    "question": "What is the repeat purchase rate?",
+    "expected_sql_contains": ["SELECT", "customers", "orders", "COUNT", "HAVING"],
+    "difficulty": "hard",
+    "category": "calculation"
+  },
+  {
+    "id": 20,
+    "question": "Show products with rating above 4.5 and more than 100 reviews",
+    "expected_sql_contains": ["SELECT", "products", "rating", "review_count", "WHERE"],
+    "difficulty": "easy",
+    "category": "filtering"
+  }
+]

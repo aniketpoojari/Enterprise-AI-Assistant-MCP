@@ -1,0 +1,22 @@
+# Enterprise AI Assistant Configuration
+
+# Database Configuration
+database:
+  path: "database/ecommerce.db"
+  max_results: 100
+
+# Search / Query Configuration
+query:
+  timeout: 30
+  max_retries: 2
+
+# Cost Tracking
+cost:
+  groq_cost_per_1k_input_tokens: 0.00006
+  groq_cost_per_1k_output_tokens: 0.00006
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/enterprise_assistant.log"

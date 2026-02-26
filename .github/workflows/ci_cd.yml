@@ -1,0 +1,200 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  PYTHON_VERSION: "3.11"
+  HF_SPACE_REPO: "aniketp2009gmail/Enterprise-AI-Assistant-MCP"
+  HF_DATASET_REPO: "aniketp2009gmail/enterprise-ai-assistant-db"
+
+jobs:
+  lint:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install black isort flake8
+      - run: black --check .
+      - run: isort --check-only .
+      - run: flake8 --count --select=E9,F63,F7,F82 --show-source --statistics .
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install -r requirements.txt
+      - run: pytest tests/test_guardrails.py tests/test_api.py -v --tb=short
+    env:
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+
+  evaluation:
+    name: Evaluation Suite
+    runs-on: ubuntu-latest
+    needs: test
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install -r requirements.txt
+      - run: python -m evaluation.run_evaluation
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: evaluation-results
+          path: evaluation/results.json
+    env:
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      EVAL_MAX_QUERIES: "5"
+
+  build:
+    name: Build & Test Docker
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t enterprise-ai-assistant:test .
+      - name: Test container health
+        run: |
+          docker run -d --name test-container \
+            -p 8000:8000 -p 7860:7860 \
+            -e GROQ_API_KEY=${{ secrets.GROQ_API_KEY }} \
+            enterprise-ai-assistant:test
+          echo "Waiting for container to start..."
+          sleep 25
+          curl -f http://localhost:8000/health || exit 1
+          echo "Health check passed!"
+          docker stop test-container
+          docker rm test-container
+
+  setup-hf-database:
+    name: Setup HF Database
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install -r requirements.txt
+      - name: Check if database exists in HF Dataset
+        id: check-db
+        run: |
+          python -c "
+          from huggingface_hub import HfApi
+          from huggingface_hub.utils import RepositoryNotFoundError
+          import os
+
+          api = HfApi(token=os.environ['HF_TOKEN'])
+          repo_id = '${{ env.HF_DATASET_REPO }}'
+
+          try:
+              files = api.list_repo_files(repo_id=repo_id, repo_type='dataset')
+              if 'ecommerce.db' in files:
+                  print('Database already exists in HF Dataset.')
+                  with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                      f.write('db_exists=true\n')
+              else:
+                  print('Dataset repo exists but no ecommerce.db found.')
+                  with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                      f.write('db_exists=false\n')
+          except RepositoryNotFoundError:
+              print('Dataset repo does not exist yet.')
+              with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                  f.write('db_exists=false\n')
+          except Exception as e:
+              print(f'Error checking dataset: {e}')
+              with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                  f.write('db_exists=false\n')
+          "
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      - name: Seed and upload database
+        if: steps.check-db.outputs.db_exists == 'false'
+        run: python -m utils.hf_db_manager seed-and-upload --repo-id ${{ env.HF_DATASET_REPO }}
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+  deploy:
+    name: Deploy to HuggingFace Spaces
+    runs-on: ubuntu-latest
+    needs: [test, build, setup-hf-database]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install huggingface-hub
+      - name: Create Space and upload files
+        run: |
+          python -c "
+          from huggingface_hub import HfApi
+
+          api = HfApi()
+          space_id = '${{ env.HF_SPACE_REPO }}'
+
+          # Create Space if it doesn't exist
+          api.create_repo(
+              repo_id=space_id,
+              repo_type='space',
+              space_sdk='docker',
+              exist_ok=True,
+          )
+          print(f'Space ready: {space_id}')
+
+          # Upload all project files
+          api.upload_folder(
+              folder_path='.',
+              repo_id=space_id,
+              repo_type='space',
+              ignore_patterns=[
+                  '*.pyc', '__pycache__', '.git', '.github',
+                  '.env', 'database/ecommerce.db', 'logs/',
+                  '.pytest_cache', '*.egg-info', '.venv', 'venv',
+                  'evaluation/results.json',
+              ],
+          )
+          print(f'Deployed to https://huggingface.co/spaces/{space_id}')
+          "
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      - name: Set Space secrets
+        run: |
+          python -c "
+          import os
+          from huggingface_hub import HfApi
+
+          api = HfApi()
+          space_id = '${{ env.HF_SPACE_REPO }}'
+
+          secrets_to_set = {
+              'GROQ_API_KEY': os.environ.get('GROQ_API_KEY', ''),
+              'HF_TOKEN': os.environ.get('HF_TOKEN', ''),
+              'HF_DATASET_REPO': '${{ env.HF_DATASET_REPO }}',
+          }
+
+          for key, value in secrets_to_set.items():
+              if value:
+                  api.add_space_secret(repo_id=space_id, key=key, value=value)
+                  print(f'Set secret: {key}')
+
+          print('Space secrets configured.')
+          "
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
