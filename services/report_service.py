@@ -106,11 +106,17 @@ class ReportService:
         for row in rows:
             if isinstance(row, dict):
                 # Truncate each value to 200 chars to avoid huge prompts if cells have long text
-                values = [str(row.get(col, ""))[:200] + ("..." if len(str(row.get(col, ""))) > 200 else "") for col in columns]
+                values = [
+                    str(row.get(col, ""))[:200]
+                    + ("..." if len(str(row.get(col, ""))) > 200 else "")
+                    for col in columns
+                ]
             else:
-                values = [str(v)[:200] + ("..." if len(str(v)) > 200 else "") for v in row]
+                values = [
+                    str(v)[:200] + ("..." if len(str(v)) > 200 else "") for v in row
+                ]
             lines.append(" | ".join(values))
-            
+
             # If total length is already too large, stop adding rows
             if sum(len(line) for line in lines) > 8000:
                 lines.append("... [Additional rows omitted for brevity]")
