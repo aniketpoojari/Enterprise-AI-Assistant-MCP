@@ -164,7 +164,6 @@ async def query(request: QueryRequest, workflow=Depends(get_workflow)):
             chart_data = result["chart_result"]
         elif result.get("messages"):
             # Try to find chart in tool results in message history
-            import json
 
             from langchain_core.messages import ToolMessage
 
@@ -188,7 +187,6 @@ async def query(request: QueryRequest, workflow=Depends(get_workflow)):
             report_data = result["report_result"]
         elif result.get("messages"):
             # Try to find report in tool results in message history
-            import json
 
             from langchain_core.messages import ToolMessage
 

@@ -1,5 +1,6 @@
 """LangGraph agent workflow for the Enterprise AI Assistant."""
 
+import json
 from typing import Any, Dict
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
@@ -185,11 +186,9 @@ class EnterpriseAssistantWorkflow:
                 ],
             }
 
-    def _clean_messages(self, messages: list) -> list:
-        """Remove or truncate large data from messages to save tokens."""
-        import json
-
-        from langchain_core.messages import ToolMessage
+        def _clean_messages(self, messages: list) -> list:
+            """Remove or truncate large data from messages to save tokens."""
+            from langchain_core.messages import ToolMessage
 
         cleaned = []
         for msg in messages:
@@ -239,8 +238,6 @@ class EnterpriseAssistantWorkflow:
             for msg in reversed(state["messages"]):
                 if hasattr(msg, "content") and isinstance(msg.content, str):
                     # Check if it contains SQL
-                    import json
-
                     try:
                         data = json.loads(msg.content)
                         sql = data.get("sql", "")
@@ -366,8 +363,6 @@ class EnterpriseAssistantWorkflow:
             final_response = ""
             chart_result = {}
             report_result = {}
-
-            import json
 
             from langchain_core.messages import ToolMessage
 
