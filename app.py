@@ -16,7 +16,9 @@ st.set_page_config(
 )
 
 # --- Constants ---
-API_BASE = "http://localhost:8001"
+import os
+BACKEND_PORT = os.environ.get("BACKEND_PORT", "8000")
+API_BASE = f"http://localhost:{BACKEND_PORT}"
 
 
 # --- Session State ---
@@ -43,7 +45,7 @@ def query_api(question: str) -> dict:
         return response.json()
     except requests.exceptions.ConnectionError:
         return {
-            "error": "Cannot connect to backend. Make sure FastAPI is running on port 8001."
+            "error": f"Cannot connect to backend. Make sure FastAPI is running on port {BACKEND_PORT}."
         }
     except requests.exceptions.ReadTimeout:
         return {

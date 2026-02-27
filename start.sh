@@ -44,6 +44,8 @@ else
     echo "Database already exists at ${DATABASE_PATH}"
 fi
 
+export BACKEND_PORT=8000
+
 echo "Starting FastAPI backend on port 8000..."
 uvicorn main:app --host 0.0.0.0 --port 8000 &
 FASTAPI_PID=$!
