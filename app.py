@@ -17,6 +17,7 @@ st.set_page_config(
 
 # --- Constants ---
 import os
+
 BACKEND_PORT = os.environ.get("BACKEND_PORT", "8000")
 API_BASE = f"http://localhost:{BACKEND_PORT}"
 
