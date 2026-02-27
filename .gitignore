@@ -10,6 +10,7 @@ database/ecommerce.db
 
 # Logs
 logs/
+server.log
 
 # IDE
 .vscode/
