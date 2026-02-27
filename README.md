@@ -84,21 +84,21 @@ Response (with SQL, chart, report, cost info)
 git clone https://github.com/aniketpoojari/Enterprise-AI-Assistant-MCP.git
 cd Enterprise-AI-Assistant-MCP
 
-# Install
+# Install dependencies
 pip install -r requirements.txt
 
-# Configure
+# Configure environment
 cp .env.example .env
 # Edit .env and add your GROQ_API_KEY
 
-# Seed database
+# Seed the database
 python -m database.seed_data
 
-# Run FastAPI backend
-uvicorn main:app --host 0.0.0.0 --port 8000 &
+# Start FastAPI backend (Port 8000)
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
-# Run Streamlit frontend
-streamlit run app.py --server.port 7860
+# Start Streamlit frontend (Port 7860)
+streamlit run app.py
 ```
 
 ## Docker
