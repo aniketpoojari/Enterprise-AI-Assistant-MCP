@@ -12,7 +12,7 @@ This system provides a natural language interface to an e-commerce database, all
 │  (port 7860)    │     │                                              │
 └─────────────────┘     │  ┌────────────┐  ┌────────────────────────┐  │
                         │  │   Input    │  │    LangGraph Agent     │  │
-                        │  │ Guardrails │─▶│  Router → Agent → Critic│ │
+                        │  │ Guardrails │─▶│ Router → Agent → Tools │  │
                         │  └────────────┘  └───────────┬────────────┘  │
                         │                              │               │
                         │                   ┌──────────▼──────────┐    │
@@ -42,6 +42,14 @@ This system provides a natural language interface to an e-commerce database, all
 ```
 
 ## Design Decisions
+
+### Guardrail-First Workflow
+
+The workflow is structured to execute Input Guardrails as the very first node after `START`. This ensures that every query—whether categorized as a data query or a general message—is validated against injection and PII patterns before any LLM processing or tool execution occurs.
+
+### Shared Service State
+
+The application utilizes a shared `GuardrailService` instance between the FastAPI application and the LangGraph workflow. This ensures that statistics reported via the `/guardrails/stats` endpoint accurately reflect all checks performed across the entire query lifecycle, providing a unified dashboard for the user.
 
 ### Why MCP (Model Context Protocol)?
 

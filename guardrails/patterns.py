@@ -28,6 +28,7 @@ INJECTION_PATTERNS = [
         re.IGNORECASE,
     ),
     re.compile(r"enter\s+(?:DAN|developer|debug|admin)\s+mode", re.IGNORECASE),
+    re.compile(r"(?:DEBUG|SAFETY)\s*=\s*(?:TRUE|FALSE|ON|OFF)", re.IGNORECASE),
     # Instruction insertion
     re.compile(r"</?(system|instruction|prompt|context)>", re.IGNORECASE),
     re.compile(r"\[INST\]|\[/INST\]|\[SYSTEM\]", re.IGNORECASE),

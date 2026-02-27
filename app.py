@@ -16,7 +16,7 @@ st.set_page_config(
 )
 
 # --- Constants ---
-API_BASE = "http://localhost:8000"
+API_BASE = "http://localhost:8001"
 
 
 # --- Session State ---
@@ -106,11 +106,13 @@ with st.sidebar:
     # Sample Questions
     st.subheader("Try These Questions")
     sample_questions = [
-        "What are the top 10 products by revenue?",
-        "Show me monthly sales trends",
-        "Which customer segment is most profitable?",
-        "What's the average order value by payment method?",
-        "Generate a report on product category performance",
+        "What are the top 5 products by total revenue?",
+        "Show me a bar chart of revenue by product category",
+        "Who are the top 3 customers by lifetime value?",
+        "Generate a detailed report on sales performance",
+        "Which products have less than 50 units in stock?",
+        "What is the average rating for Electronics products?",
+        "Show me the count of orders by status",
     ]
     for q in sample_questions:
         if st.button(q, key=f"sample_{q[:20]}", use_container_width=True):

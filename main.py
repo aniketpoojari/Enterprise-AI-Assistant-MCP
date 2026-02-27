@@ -58,7 +58,9 @@ async def lifespan(app: FastAPI):
         db_manager = DatabaseManager()
         guardrail_service = GuardrailService()
         cost_service = CostService()
-        workflow_instance = EnterpriseAssistantWorkflow(model_provider=model_provider)
+        workflow_instance = EnterpriseAssistantWorkflow(
+            model_provider=model_provider, guardrail_service=guardrail_service
+        )
         workflow_instance.build_graph()
 
         logger.info("All services initialized successfully")
@@ -362,4 +364,4 @@ async def health():
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8001)

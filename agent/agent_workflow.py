@@ -27,12 +27,12 @@ logger = get_logger(__name__)
 class EnterpriseAssistantWorkflow:
     """LangGraph workflow for the Enterprise AI Assistant."""
 
-    def __init__(self, model_provider: str = "groq"):
+    def __init__(self, model_provider: str = "groq", guardrail_service: GuardrailService = None):
         try:
             self.model_loader = ModelLoader(model_provider)
             self.llm = self.model_loader.load_llm()
             self.cost_tracker = CostTracker()
-            self.guardrail_service = GuardrailService()
+            self.guardrail_service = guardrail_service or GuardrailService()
 
             # All tools available to the agent
             self.tools = [query_database, generate_chart, generate_report]
@@ -62,21 +62,21 @@ class EnterpriseAssistantWorkflow:
             graph.add_node("general_response", self.general_response_node)
 
             # Define edges
-            graph.add_edge(START, "router")
+            graph.add_edge(START, "guardrail_check")
+            graph.add_conditional_edges(
+                "guardrail_check",
+                self._check_guardrail_result,
+                {
+                    "allowed": "router",
+                    "blocked": END,
+                },
+            )
             graph.add_conditional_edges(
                 "router",
                 self._route_by_intent,
                 {
                     "general": "general_response",
-                    "data_query": "guardrail_check",
-                },
-            )
-            graph.add_conditional_edges(
-                "guardrail_check",
-                self._check_guardrail_result,
-                {
-                    "allowed": "agent",
-                    "blocked": END,
+                    "data_query": "agent",
                 },
             )
             graph.add_conditional_edges(
@@ -186,9 +186,9 @@ class EnterpriseAssistantWorkflow:
                 ],
             }
 
-        def _clean_messages(self, messages: list) -> list:
-            """Remove or truncate large data from messages to save tokens."""
-            from langchain_core.messages import ToolMessage
+    def _clean_messages(self, messages: list) -> list:
+        """Remove or truncate large data from messages to save tokens."""
+        from langchain_core.messages import ToolMessage
 
         cleaned = []
         for msg in messages:

@@ -21,16 +21,18 @@ User Query
 [Input Guardrails] --> Blocked? --> Error Response
     |
     v (allowed)
-[LangGraph Agent] --> Router --> Intent Classification
+[LangGraph Agent]
     |
-    v
-[MCP Tools via FastMCP]
-    |--- query_database   (NL-to-SQL + execution)
-    |--- generate_chart   (matplotlib visualization)
-    |--- generate_report  (markdown business reports)
+    ├── Router --> Intent Classification (General, Query, Chart, Report)
     |
-    v
-[Output Guardrails] --> SQL validation, data masking
+    ├── Agent Node --> LLM Logic (Groq Llama 3.1 8B)
+    |
+    ├── MCP Tools (FastMCP)
+    |   |--- query_database   (NL-to-SQL + execution)
+    |   |--- generate_chart   (matplotlib visualization)
+    |   |--- generate_report  (markdown business reports)
+    |
+    └── Output Guardrails --> SQL validation, data masking
     |
     v
 [Cost Tracker] --> Token counting, cost estimation
@@ -45,12 +47,22 @@ Response (with SQL, chart, report, cost info)
 |---------|-------------|
 | **MCP Protocol** | Standardized tool connectivity via FastMCP (Model Context Protocol) |
 | **NL-to-SQL** | Schema-aware natural language to SQL conversion with validation |
-| **Input Guardrails** | Prompt injection detection, PII filtering, query validation |
+| **Input Guardrails** | Prompt injection detection, PII filtering, query validation (executed first) |
 | **Output Guardrails** | SQL injection prevention, sensitive data masking, hallucination detection |
 | **Cost Tracking** | Per-request token counting, cost estimation, usage dashboard |
 | **Visualization** | Auto-generated charts (bar, line, pie, scatter) from query results |
 | **Reports** | Markdown business reports with key findings and insights |
-| **Evaluation Suite** | SQL accuracy, guardrail effectiveness, and agent decision quality testing |
+| **Shared Analytics** | Unified statistics for guardrails and costs across the entire application |
+
+## Try These Questions
+
+- "What are the top 5 products by total revenue?"
+- "Show me a bar chart of revenue by product category"
+- "Who are the top 3 customers by lifetime value?"
+- "Generate a detailed report on sales performance"
+- "Which products have less than 50 units in stock?"
+- "What is the average rating for Electronics products?"
+- "Show me the count of orders by status"
 
 ## Tech Stack
 
