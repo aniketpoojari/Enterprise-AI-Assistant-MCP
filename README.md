@@ -107,7 +107,7 @@ streamlit run app.py
 docker-compose up --build
 ```
 
-Access: Streamlit UI at `http://localhost:7860`, API at `http://localhost:8000`
+Access: Streamlit UI at `http://localhost:7860`, API at `http://localhost:8000`, Evaluation Platform at `http://localhost:8888`
 
 ## API Endpoints
 
