@@ -27,7 +27,9 @@ logger = get_logger(__name__)
 class EnterpriseAssistantWorkflow:
     """LangGraph workflow for the Enterprise AI Assistant."""
 
-    def __init__(self, model_provider: str = "groq", guardrail_service: GuardrailService = None):
+    def __init__(
+        self, model_provider: str = "groq", guardrail_service: GuardrailService = None
+    ):
         try:
             self.model_loader = ModelLoader(model_provider)
             self.llm = self.model_loader.load_llm()
