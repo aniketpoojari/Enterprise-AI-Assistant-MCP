@@ -10,6 +10,13 @@ pinned: false
 
 # Enterprise AI Assistant with MCP + Guardrails
 
+![Python](https://img.shields.io/badge/python-3670AD?style=for-the-badge&logo=python&logoColor=ffdd54)
+![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white)
+![LangGraph](https://img.shields.io/badge/LangGraph-005571?style=for-the-badge)
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+![HuggingFace](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-yellow?style=for-the-badge)
+
 [![HuggingFace Space](https://img.shields.io/badge/HuggingFace-Space-orange)](https://huggingface.co/spaces/aniketp2009gmail/Enterprise-AI-Assistant-MCP)
 
 An AI-powered e-commerce analytics assistant that converts natural language questions into database queries, generates charts and reports. Built with **Model Context Protocol (MCP)** for standardized tool connectivity, protected by **input/output guardrails**, and instrumented with **token cost tracking**.
