@@ -10,7 +10,11 @@ pinned: false
 
 # Enterprise AI Assistant with MCP + Guardrails
 
+[![HuggingFace Space](https://img.shields.io/badge/HuggingFace-Space-orange)](https://huggingface.co/spaces/aniketp2009gmail/Enterprise-AI-Assistant-MCP)
+
 An AI-powered e-commerce analytics assistant that converts natural language questions into database queries, generates charts and reports. Built with **Model Context Protocol (MCP)** for standardized tool connectivity, protected by **input/output guardrails**, and instrumented with **token cost tracking**.
+
+**🚀 Try it live on Hugging Face Spaces: [Enterprise AI Assistant](https://huggingface.co/spaces/aniketp2009gmail/Enterprise-AI-Assistant-MCP)**
 
 ## Architecture
 
